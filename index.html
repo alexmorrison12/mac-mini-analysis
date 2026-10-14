@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Configure a Mac mini or Mac Studio, see the best price across stores, and compare any two builds.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mac Mini Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: configurator first (sticky stage + price on the left, choices on the right), then the lineup map, head-to-head, and the full price sheet. */
+:root{
+  --bg:#ECEEF1; --surface:#FFFFFF; --surface-2:#F5F6F8; --ink:#111318; --ink-2:#3A3F48; --muted:#69707C;
+  --line:#D8DCE2; --accent:#2346D8; --accent-ink:#FFFFFF; --accent-soft:#E2E7FB; --good:#0A7A54; --good-soft:#DCF1E8;
+  --warn:#A4531A; --warn-soft:#F7E8DC;
+  --metal-top:#E8EAED; --metal-left:#C3C8CF; --metal-right:#D6DAE0; --metal-edge:#A9AFB8; --port:#262A31;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:14px; --r-sm:10px;
+  --shadow:0 1px 2px rgba(17,19,24,.06),0 8px 24px rgba(17,19,24,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B0D10; --surface:#14171C; --surface-2:#1A1E24; --ink:#EDEFF2; --ink-2:#C4C9D1; --muted:#8C94A1;
+  --line:#272C34; --accent:#809BFF; --accent-ink:#0B0D10; --accent-soft:#1C2446; --good:#4CCB9A; --good-soft:#10302A;
+  --warn:#E59A62; --warn-soft:#38261A;
+  --metal-top:#545A63; --metal-left:#2C3036; --metal-right:#3B4048; --metal-edge:#666D77; --port:#08090B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B0D10; --surface:#14171C; --surface-2:#1A1E24; --ink:#EDEFF2; --ink-2:#C4C9D1; --muted:#8C94A1;
+  --line:#272C34; --accent:#809BFF; --accent-ink:#0B0D10; --accent-soft:#1C2446; --good:#4CCB9A; --good-soft:#10302A;
+  --warn:#E59A62; --warn-soft:#38261A;
+  --metal-top:#545A63; --metal-left:#2C3036; --metal-right:#3B4048; --metal-edge:#666D77; --port:#08090B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.02em}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:16px}
+@media (min-width:720px){.wrap{padding-inline:28px}}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;height:56px}
+.brand{font-family:var(--f-display);font-stretch:125%;font-weight:800;font-size:15px;letter-spacing:.02em;white-space:nowrap;text-transform:uppercase}
+.brand span{color:var(--muted);font-weight:500}
+.nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{color:var(--ink-2);text-decoration:none;font-weight:500;font-size:14px;padding:7px 11px;border-radius:999px;white-space:nowrap}
+.nav a:hover{background:var(--surface)}
+.nav a.on{background:var(--ink);color:var(--bg)}
+@media (max-width:560px){.brand span{display:none}.nav a{padding:7px 9px;font-size:13px}}
+@media (max-width:520px){.brand{display:none}.nav{margin:0 auto}}
+
+/* ---------- prefs strip ---------- */
+.prefs{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block:14px 4px}
+.prefs .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px 6px 9px;font-size:13px;font-weight:500;line-height:1.2}
+.chip .tick{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);display:grid;place-items:center;flex:none}
+.chip[aria-pressed="true"]{border-color:var(--ink);}
+.chip[aria-pressed="true"] .tick{background:var(--ink);border-color:var(--ink)}
+.chip[aria-pressed="true"] .tick::after{content:"";width:7px;height:4px;border:2px solid var(--bg);border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.chip:disabled{opacity:.5;cursor:not-allowed}
+.chip small{color:var(--muted);font-weight:400}
+.chip.trade[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft)}
+.chip.trade[aria-pressed="true"] .tick{background:var(--good);border-color:var(--good)}
+.sync{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);background:none;border:0;padding:6px 0}
+.sync .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.sync[data-state="live"] .dot{background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
+.sync[data-state="busy"] .dot{background:var(--accent);animation:pulse 1s ease-in-out infinite}
+.sync[data-state="warn"] .dot{background:var(--warn)}
+.sync b{color:var(--ink-2);font-weight:600}
+@keyframes pulse{50%{opacity:.3}}
+.syncnote{font-size:12.5px;color:var(--warn);padding-top:2px}
+.syncnote button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;margin-left:6px;font-size:12px}
+
+/* ---------- section heads ---------- */
+section{padding-block:28px 8px}
+.shead{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px 20px;margin-bottom:18px}
+.shead h2{font-family:var(--f-display);font-stretch:118%;font-weight:750;font-size:clamp(24px,3.4vw,34px);line-height:1.05;letter-spacing:-.01em;margin:4px 0 0;text-wrap:balance}
+.shead p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+
+/* ---------- build ---------- */
+.build{display:grid;gap:18px}
+@media (min-width:960px){.build{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}.stagecol{position:sticky;top:calc(72px + env(safe-area-inset-top,0px))}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.stage{padding:18px 18px 16px;overflow:hidden;position:relative}
+.stage .model{font-family:var(--f-display);font-stretch:125%;font-weight:800;font-size:clamp(30px,5.4vw,46px);line-height:.95;letter-spacing:-.015em;margin:2px 0 6px}
+.stage .model em{font-style:normal;color:var(--accent)}
+.stage .sub{color:var(--ink-2);font-size:14px}
+.device{display:block;width:100%;max-width:100%;height:auto;margin:6px 0 2px}
+.device .ghost{fill:none;stroke:var(--metal-edge);stroke-width:1;stroke-dasharray:3 4;opacity:.8}
+.scale{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;color:var(--muted)}
+.scale .on{color:var(--ink)}
+@media (max-width:420px){.scale span:nth-child(2){display:none}}
+.pricebox{border-top:1px solid var(--line);margin-top:12px;padding-top:14px;display:grid;gap:4px}
+.big{font-family:var(--f-display);font-stretch:112%;font-weight:750;font-size:clamp(36px,6vw,52px);line-height:1;letter-spacing:-.02em}
+.big sup{font-size:.45em;vertical-align:.95em;margin-right:1px;font-weight:600}
+.where{font-size:14px;color:var(--ink-2)}
+.where b{font-weight:600;color:var(--ink)}
+.save{display:inline-flex;align-items:center;gap:6px;background:var(--good-soft);color:var(--good);border-radius:999px;padding:3px 10px;font-weight:600;font-size:13px;width:max-content}
+.save.zero{background:var(--surface-2);color:var(--muted)}
+.sheetnote{margin-top:10px;font-size:13px;background:var(--surface-2);border-radius:var(--r-sm);padding:8px 11px;color:var(--ink-2)}
+
+/* ladder */
+.ladder{margin-top:14px;display:grid;gap:2px}
+.rung{display:grid;grid-template-columns:minmax(92px,auto) 1fr auto;align-items:center;gap:12px;padding:7px 0;border-top:1px dashed var(--line)}
+.rung:first-child{border-top:0}
+.rung .st{font-size:13.5px;font-weight:500;white-space:nowrap}
+.rung .st small{display:block;color:var(--muted);font-weight:400;font-size:11.5px}
+.rung .tr{position:relative;height:18px}
+.rung .tr::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:var(--line);border-radius:2px}
+.rung .fill{position:absolute;left:0;top:50%;height:2px;margin-top:-1px;background:var(--ink-2);border-radius:2px;opacity:.35}
+.rung .pin{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--surface);border:2px solid var(--ink-2)}
+.rung.best .pin{background:var(--good);border-color:var(--good);width:14px;height:14px;margin:-7px 0 0 -7px}
+.rung.msrp .pin{border-radius:3px}
+.rung .pr{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
+.rung .pr small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.rung .pr s{color:var(--muted);font-weight:400;margin-right:4px;font-size:12px}
+.rung.best .pr{color:var(--good)}
+.missing{font-size:12px;color:var(--muted);padding-top:6px}
+
+/* steps */
+.steps{display:grid;gap:14px}
+.step{padding:16px}
+.step h3{display:flex;align-items:baseline;gap:10px;margin:0 0 12px;font-size:15px;font-weight:600}
+.step h3 .n{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+.step h3 .hint{margin-left:auto;font-weight:400;color:var(--muted);font-size:12.5px}
+.opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{position:relative;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r-sm);padding:11px 12px;display:grid;gap:2px;transition:border-color .15s,background .15s,transform .15s}
+.opt:hover{border-color:var(--ink-2)}
+.opt:active{transform:scale(.985)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .t{font-weight:650;font-size:15px;line-height:1.2}
+.opt .t b{font-family:var(--f-display);font-stretch:118%;font-weight:750}
+.opt .d{font-size:12.5px;color:var(--muted);line-height:1.35}
+.opt .p{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.opt .p.up{color:var(--ink-2)} .opt .p.down{color:var(--good)}
+.opt .p.cur{color:var(--accent)}
+.opt .also{font-size:11.5px;color:var(--warn)}
+.opt.prod{grid-template-columns:auto 1fr;align-items:center;column-gap:12px}
+.opt.prod svg{grid-row:span 3;width:54px;height:40px}
+
+/* spec meters */
+.specs{padding:16px;display:grid;gap:12px}
+.meter{display:grid;grid-template-columns:110px 1fr auto;gap:12px;align-items:center}
+.meter .k{font-size:13px;color:var(--ink-2)}
+.meter .v{font-weight:650;font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap;text-align:right;min-width:78px}
+.segs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;height:10px}
+.segs i{background:var(--surface-2);border-radius:2px;box-shadow:inset 0 0 0 1px var(--line)}
+.segs i.on{background:var(--accent);box-shadow:none}
+.specfoot{font-size:12px;color:var(--muted)}
+
+/* ---------- map ---------- */
+.mapcard{padding:14px 14px 12px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mapsvg{display:block;width:100%;height:auto;touch-action:manipulation}
+.mapsvg text{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted)}
+.mapsvg .grid{stroke:var(--line);stroke-width:1}
+.mapsvg .whisk{stroke:var(--muted);stroke-width:1.25;opacity:.45}
+.mapsvg .front{fill:none;stroke:var(--good);stroke-width:1.75;stroke-dasharray:5 4;opacity:.9}
+.mapsvg .pt{cursor:pointer}
+.mapsvg .pt .mk-mini{fill:var(--accent)}
+.mapsvg .pt .mk-studio{fill:var(--ink)}
+.mapsvg .pt .hit{fill:transparent}
+.mapsvg .pt:hover .mk-mini,.mapsvg .pt:hover .mk-studio{opacity:.75}
+.mapsvg .ring{fill:none;stroke:var(--accent);stroke-width:2.5}
+.mapsvg .ring.rival{stroke:var(--warn);stroke-dasharray:3 3}
+.mapsvg .ring.pick{stroke:var(--ink);stroke-width:1.5}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);padding:8px 2px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.lg.sq{border-radius:2px;background:var(--ink)}
+.lg.rg{background:none;border:2px solid var(--accent);width:12px;height:12px}
+.lg.ln{width:18px;height:0;border-top:2px dashed var(--good);border-radius:0;background:none}
+.lg.wh{width:18px;height:0;border-top:1.5px solid var(--muted);border-radius:0;background:none;opacity:.7}
+.pick{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface-2)}
+.pick .nm{font-weight:650}
+.pick .nm small{display:block;color:var(--muted);font-weight:400;font-size:12.5px}
+.pick .acts{margin-left:auto;display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--good-soft);color:var(--good);vertical-align:1px}
+
+/* ---------- compare ---------- */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.side{padding:14px;display:grid;gap:4px;align-content:start;min-width:0}
+.side .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.side.b .tag{color:var(--warn)}
+.side .nm{font-family:var(--f-display);font-stretch:112%;font-weight:750;font-size:19px;line-height:1.1}
+.side .cf{font-size:13px;color:var(--ink-2)}
+.side .pp{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;margin-top:4px}
+.side .pp small{font-weight:400;font-size:12px;color:var(--muted)}
+.side select{margin-top:6px;width:100%;font:inherit;font-size:13px;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink)}
+.vsmid{display:grid;place-items:center;font-family:var(--f-display);font-stretch:125%;font-weight:800;color:var(--muted);font-size:13px}
+.vsmid button{border:1px solid var(--line);background:var(--surface);border-radius:50%;width:34px;height:34px;display:grid;place-items:center}
+.verdict{font-family:var(--f-display);font-stretch:105%;font-weight:600;font-size:clamp(18px,2.4vw,22px);line-height:1.3;margin:18px 0 14px;text-wrap:balance;max-width:52ch}
+.verdict .g{color:var(--good)} .verdict .w{color:var(--warn)}
+.deltas{padding:8px 16px}
+.drow{display:grid;grid-template-columns:120px 70px 1fr 70px;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.drow:first-child{border-top:0}
+.drow .k{font-size:13.5px;font-weight:500}
+.drow .k small{display:block;color:var(--muted);font-weight:400;font-size:11.5px}
+.drow .a,.drow .b{font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600}
+.drow .a{text-align:right;color:var(--accent)} .drow .b{color:var(--warn)}
+.dtrack{position:relative;height:26px}
+.dtrack::before{content:"";position:absolute;left:50%;top:2px;bottom:2px;width:1px;background:var(--line)}
+.dbar{position:absolute;top:8px;height:10px;border-radius:3px}
+.dbar.gain{background:var(--good)} .dbar.loss{background:var(--warn)} .dbar.cost{background:var(--ink-2);opacity:.55}
+.dlab{position:absolute;top:0;font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums;line-height:26px;white-space:nowrap;color:var(--ink-2)}
+.drow.same .dlab{color:var(--muted);font-weight:400}
+@media (max-width:620px){
+  .vs{grid-template-columns:1fr;gap:8px}.vsmid{grid-auto-flow:column;gap:10px}
+  .drow{grid-template-columns:52px 1fr 52px;row-gap:4px}
+  .drow .k{grid-column:1/-1}
+}
+
+/* ---------- table ---------- */
+.tscroll{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-mono);font-weight:500;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1}
+th:first-child{background:var(--surface-2);z-index:2}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--surface-2)}
+tbody tr.cur td{background:var(--accent-soft)}
+td .cfg{font-weight:600}
+td .cfg small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+td.na{color:var(--line)}
+td .bp{color:var(--good);font-weight:700}
+td .bp::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:6px;vertical-align:1px}
+td.sv{color:var(--good);font-weight:600}
+tr.grp td{background:var(--surface-2);font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:default;padding-block:7px}
+tr.grp td:first-child{background:var(--surface-2)}
+.tfoot{font-size:12.5px;color:var(--muted);padding:10px 2px 0;max-width:80ch}
+footer{padding-block:28px 40px;color:var(--muted);font-size:12.5px}
+
+/* ---------- mobile bar ---------- */
+.mbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:12px;transform:translateY(0);transition:transform .25s}
+.mbar .l{min-width:0;flex:1}
+.mbar .l .c{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbar .l .pr{font-family:var(--f-display);font-stretch:112%;font-weight:750;font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.mbar .l .pr small{font-family:var(--f-body);font-weight:500;font-size:12.5px;color:var(--ink-2);margin-left:6px}
+.mbar.hide{transform:translateY(110%)}
+body{padding-bottom:84px}
+@media (min-width:960px){.mbar{display:none}body{padding-bottom:0}}
+</style>
+
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Mac Mini Analysis <span>· mini &amp; Studio</span></div>
+    <nav class="nav" id="nav">
+      <a href="#build" class="on">Build</a>
+      <a href="#map">Map</a>
+      <a href="#compare">Compare</a>
+      <a href="#prices">Prices</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="prefs" id="prefs" aria-label="Where you can buy"></div>
+    <div class="syncnote" id="syncnote" hidden></div>
+  </div>
+
+  <!-- BUILD -->
+  <section id="build" class="wrap">
+    <div class="shead">
+      <div>
+        <div class="eyebrow">Configure</div>
+        <h2>Build it, see what it really costs.</h2>
+      </div>
+      <p>Pick a machine, chip, memory and storage. Each option shows what it adds to the best price you can actually get.</p>
+    </div>
+    <div class="build">
+      <div class="stagecol">
+        <div class="card stage" id="stage"></div>
+      </div>
+      <div class="steps" id="steps"></div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section id="map" class="wrap">
+    <div class="shead">
+      <div>
+        <div class="eyebrow">The whole lineup</div>
+        <h2>Every configuration on one map.</h2>
+      </div>
+      <p>Further right costs more. Higher up is more machine. Dots on the green line give you the most for the money, so anything below and to the right of it is beaten by something cheaper.</p>
+    </div>
+    <div class="card mapcard">
+      <div class="seg" id="metricSeg" role="group" aria-label="Measure"></div>
+      <div id="mapHost"></div>
+      <div class="legend" id="legend"></div>
+      <div id="pick"></div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section id="compare" class="wrap">
+    <div class="shead">
+      <div>
+        <div class="eyebrow">Head to head</div>
+        <h2>What the extra money buys.</h2>
+      </div>
+      <p>Your build against any other configuration. Bars show the change from yours: green is a gain, orange is something you give up.</p>
+    </div>
+    <div class="vs" id="vs"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="card deltas" id="deltas"></div>
+  </section>
+
+  <!-- PRICES -->
+  <section id="prices" class="wrap">
+    <div class="shead">
+      <div>
+        <div class="eyebrow">The sheet</div>
+        <h2>Every price, every store.</h2>
+      </div>
+      <div class="seg" id="sortSeg" role="group" aria-label="Sort"></div>
+    </div>
+    <div class="tscroll"><table id="tbl"></table></div>
+    <p class="tfoot" id="tfoot"></p>
+  </section>
+
+  <footer class="wrap" id="foot"></footer>
+</main>
+
+<div class="mbar" id="mbar">
+  <div class="l">
+    <div class="c" id="mbarC"></div>
+    <div class="pr" id="mbarP"></div>
+  </div>
+  <span class="save" id="mbarS"></span>
+</div>
+<script>
+// ===== Source sheet =====
+const SHEET_ID = "1-zCjxMFzdce7GhrvpZYl-LlzJzS5irlFXbYTvmeD1nM";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/edit";
+const SNAPSHOT_DATE = "Oct 13, 2026";
+// Snapshot of the WORKING SHEET tab, used until (or unless) the live read succeeds.
+const SNAPSHOT = {
+  headers: ["Category","Product","CPU","GPU","Ram","SSD","Mem Bandwidth","Microcenter","BestBuy","Manufacturer","Education","Diff (L - H)","Costco","Trade in $565","Status","Notes"],
+  rows: [
+    ["Electronics","Mac Mini","M6 12","12","16gb","256gb","153 GB/s","$699.00","","$899.00","$799.00","$200.00","$779.99","$234.00","",""],
+    ["Electronics","Mac Mini","M6 12","12","16gb","512gb","153 GB/s","$999.00","","$1,099.00","$999.00","$100.00","$949.99","$434.00","",""],
+    ["Electronics","Mac Mini","M6 12","12","16gb","1tb","153 GB/s","","","$1,399.00","$1,269.00","$130.00","","","",""],
+    ["Electronics","Mac Mini","M6 12","12","24gb","512gb","170 GB/s","$1,149.00","","$1,299.00","$1,199.00","$100.00","$1,149.99","","",""],
+    ["Electronics","Mac Mini","M6 12","12","24gb","1tb","170 GB/s","","","$1,599.00","$1,469.00","$130.00","","","",""],
+    ["Electronics","Mac Mini","M6 12","12","32gb","512gb","170 GB/s","","","$1,499.00","$1,379.00","$120.00","","","",""],
+    ["Electronics","Mac Mini","M6 12","12","32gb","1tb","170 GB/s","","","$1,799.00","$1,649.00","$150.00","","","",""],
+    ["Electronics","Mac Mini","M4 Pro 12","16","24gb","512gb","273 GB/s","$1,299.00","","$1,599.00","","$399.03","$1,199.97","","",""],
+    ["Electronics","Mac Mini","M4 Pro 12","16","48gb","512gb","273 GB/s","$1,799.00","","$2,199.00","","$400.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","24gb","512gb","307 GB/s","$1,499.00","","$1,699.00","$1,599.00","$200.00","$1,549.99","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","24gb","1tb","307 GB/s","","","$1,999.00","$1,869.00","$130.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","48gb","512gb","307 GB/s","","","$2,299.00","$2,139.00","$160.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","48gb","1tb","307 GB/s","","","$2,599.00","$2,409.00","$190.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 18","20","24gb","512gb","307 GB/s","","","$1,899.00","$1,799.00","$100.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 18","20","48gb","512gb","307 GB/s","","","$2,499.00","$2,319.00","$180.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 18","20","48gb","1tb","307 GB/s","","","$2,799.00","$2,589.00","$210.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","32","36gb","512gb","460 GB/s","$2,299.00","","$2,499.00","$2,299.00","$200.00","$2,299.00","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","32","36gb","1tb","460 GB/s","","","$2,799.00","$2,569.00","$230.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","48gb","512gb","614 GB/s","","","$3,099.00","$2,839.00","$260.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","48gb","1tb","614 GB/s","$3,399.00","","$3,399.00","$3,109.00","$290.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","64gb","512gb","614 GB/s","","","$3,399.00","$3,199.00","$200.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","64gb","1tb","614 GB/s","","","$3,799.00","$3,460.00","$339.00","","","",""],
+    ["Electronics","Mac Studio","M5 Ultra 30","64","96gb","1tb","1200 GB/s","","","$5,499.00","$5,099.00","$400.00","","","",""],
+    ["Electronics","Mac Studio","M5 Ultra 30","64","96gb","2tb","1200 GB/s","","","$5,999.00","$5,499.00","$500.00","","","",""]
+  ]
+};
+
+// ===== Parsing helpers =====
+const norm = s => String(s ?? "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+const money = s => { const v = parseFloat(String(s ?? "").replace(/[$,\s]/g, "")); return isFinite(v) && v > 0 ? v : null; };
+const intOf = s => { const m = String(s ?? "").match(/[\d.]+/); return m ? parseFloat(m[0]) : null; };
+const sizeGB = s => { const t = String(s ?? "").toLowerCase(); const n = intOf(t); if (n == null) return null; return /tb/.test(t) ? n * 1024 : n; };
+
+const STORE_NAMES = {
+  microcenter: ["Micro Center", "Micro Center"], bestbuy: ["Best Buy", "Best Buy"], costco: ["Costco", "Costco"],
+  manufacturer: ["Apple", "Apple"], apple: ["Apple", "Apple"], msrp: ["Apple", "Apple"],
+  education: ["Apple Education", "Apple Edu"], edu: ["Apple Education", "Apple Edu"]
+};
+const SPEC_KEYS = new Set(["category","product","cpu","gpu","ram","memory","ssd","storage","membandwidth","bandwidth","status","notes"]);
+
+// Read the markdown table the Drive connector returns for a Sheet.
+function parseSheetText(text) {
+  const lines = String(text || "").split(/\r?\n/);
+  let headers = null; const rows = [];
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t.startsWith("|")) { if (headers && rows.length) break; continue; }
+    const cells = t.replace(/^\|/, "").replace(/\|$/, "").split("|").map(c => c.trim());
+    if (cells.every(c => c === "" || /^:?-{2,}:?$/.test(c))) continue;
+    if (!headers) {
+      const n = cells.map(norm);
+      if (n.includes("product") && n.includes("cpu")) headers = cells;
+      continue;
+    }
+    rows.push(cells);
+  }
+  return headers ? { headers, rows } : null;
+}
+
+// Turn headers + rows into the app's model.
+function buildModel(src) {
+  const H = src.headers.map(norm);
+  const col = (...names) => H.findIndex(h => names.includes(h));
+  const ci = {
+    product: col("product"), cpu: col("cpu"), gpu: col("gpu"), ram: col("ram", "memory"), ssd: col("ssd", "storage"),
+    bw: col("membandwidth", "bandwidth", "memorybandwidth"), status: col("status"), notes: col("notes")
+  };
+  const tradeIdx = H.findIndex(h => h.startsWith("tradein"));
+  const tradeAmt = tradeIdx >= 0 ? intOf(src.headers[tradeIdx].replace(/trade\s*in/i, "")) : null;
+
+  const stores = [];
+  H.forEach((h, i) => {
+    if (SPEC_KEYS.has(h) || h.startsWith("diff") || h.startsWith("tradein") || !h) return;
+    const nm = STORE_NAMES[h] || [src.headers[i], src.headers[i]];
+    const msrp = h === "manufacturer" || h === "msrp" || h === "apple";
+    const apple = msrp || h === "education" || h === "edu";
+    stores.push({ key: h, idx: i, name: nm[0], short: nm[1], msrp, apple });
+  });
+  if (!stores.some(s => s.msrp)) return null;
+
+  const rows = [];
+  src.rows.forEach((r, n) => {
+    const product = (r[ci.product] || "").trim();
+    const cpuRaw = (r[ci.cpu] || "").trim();
+    if (!product || !cpuRaw) return;
+    const m = cpuRaw.match(/^(.*?)\s+(\d+)\s*$/);
+    const chip = m ? m[1] : cpuRaw, cpu = m ? +m[2] : null;
+    const gpu = intOf(r[ci.gpu]), ram = sizeGB(r[ci.ram]), ssd = sizeGB(r[ci.ssd]), bw = intOf(r[ci.bw]);
+    const prices = {};
+    stores.forEach(s => { const v = money(r[s.idx]); if (v != null) prices[s.key] = v; });
+    if (!Object.keys(prices).length) return;
+    const productLabel = /studio/i.test(product) ? "Mac Studio" : /mini/i.test(product) ? "Mac mini" : product;
+    rows.push({
+      id: [productLabel, chip, cpu, gpu, ram, ssd].join("|"), n, product: productLabel, chip, cpu, gpu, ram, ssd, bw, prices,
+      chipKey: [productLabel, chip, cpu, gpu].join("|"),
+      status: ci.status >= 0 ? (r[ci.status] || "").trim() : "", notes: ci.notes >= 0 ? (r[ci.notes] || "").trim() : ""
+    });
+  });
+  if (!rows.length) return null;
+  const products = [...new Set(rows.map(r => r.product))];
+  return { stores, rows, products, tradeAmt, byId: Object.fromEntries(rows.map(r => [r.id, r])) };
+}
+
+// ===== Formatting =====
+const fmt$ = v => v == null ? "—" : "$" + (Math.round(v) === v || Math.abs(v - Math.round(v)) < 0.005
+  ? Math.round(v).toLocaleString("en-US") : v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+const fmtDelta = v => (v > 0 ? "+" : v < 0 ? "−" : "") + fmt$(Math.abs(v));
+const fmtSize = gb => gb >= 1024 ? (gb / 1024) + " TB" : gb + " GB";
+const chipCores = r => `${r.cpu}-core CPU · ${r.gpu}-core GPU`;
+const chipLabel = r => `${r.chip}`;
+const shortCfg = r => `${fmtSize(r.ram)} · ${fmtSize(r.ssd)}`;
+const fullName = r => `${r.product} ${r.chip} ${r.cpu}/${r.gpu}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ===== State =====
+const LS = "macmini-analysis-v1";
+const saved = (() => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } })();
+const state = {
+  model: null, source: "snapshot",
+  off: new Set(saved.off || []),          // store keys the viewer can't buy from
+  trade: !!saved.trade,
+  cur: saved.cur || null, rival: saved.rival || null,
+  metric: saved.metric || "bw", sort: saved.sort || "lineup", pick: null
+};
+function persist() {
+  try { localStorage.setItem(LS, JSON.stringify({ off: [...state.off], trade: state.trade, cur: state.cur, rival: state.rival, metric: state.metric, sort: state.sort })); } catch {}
+}
+
+// ===== Pricing =====
+// Every price a viewer could pay for a row, after their store choices and trade-in.
+function offers(r) {
+  const M = state.model, out = [];
+  M.stores.forEach(s => {
+    const raw = r.prices[s.key];
+    if (raw == null) return;
+    const credit = state.trade && s.apple && M.tradeAmt ? M.tradeAmt : 0;
+    out.push({ store: s, raw, price: Math.max(0, raw - credit), credit, off: !s.msrp && state.off.has(s.key) });
+  });
+  return out.sort((a, b) => a.price - b.price || (a.store.msrp ? 1 : -1));
+}
+function msrpOf(r) { const s = state.model.stores.find(s => s.msrp); return r.prices[s.key] ?? null; }
+function best(r) {
+  const live = offers(r).filter(o => !o.off);
+  if (!live.length) return { price: msrpOf(r), stores: [], save: 0 };
+  const p = live[0].price;
+  const stores = live.filter(o => Math.abs(o.price - p) < 0.005).map(o => o.store);
+  return { price: p, stores, save: Math.max(0, (msrpOf(r) ?? p) - p) };
+}
+
+// ===== Configuration logic =====
+function nearest(list, want, key) {
+  let bestR = null, d = Infinity;
+  list.forEach(r => { const dd = Math.abs(Math.log2(r[key] / want)); if (dd < d - 1e-9) { d = dd; bestR = r; } });
+  return bestR;
+}
+// Snap to a real configuration, keeping as much of the request as the lineup allows.
+function snap({ product, chipKey, ram, ssd }) {
+  const M = state.model;
+  let pool = M.rows.filter(r => r.product === product);
+  if (!pool.length) pool = M.rows;
+  if (chipKey) { const c = pool.filter(r => r.chipKey === chipKey); if (c.length) pool = c; }
+  else pool = pool.filter(r => r.chipKey === pool.slice().sort((a, b) => best(a).price - best(b).price)[0].chipKey);
+  if (ram) { const r0 = nearest(pool, ram, "ram"); pool = pool.filter(r => r.ram === r0.ram); }
+  else { const lo = Math.min(...pool.map(r => r.ram)); pool = pool.filter(r => r.ram === lo); }
+  if (ssd) return nearest(pool, ssd, "ssd");
+  return pool.slice().sort((a, b) => a.ssd - b.ssd)[0];
+}
+function current() { return state.model.byId[state.cur] || state.model.rows[0]; }
+function setCur(id, opts = {}) {
+  state.cur = id; state.pick = opts.keepPick ? state.pick : null;
+  if (!state.model.byId[state.rival] || state.rival === id) state.rival = defaultRival(current()).id;
+  persist(); renderAll();
+}
+// Suggest the next real step up: the cheapest config with more bandwidth or GPU.
+function defaultRival(r) {
+  const b = best(r).price;
+  const up = state.model.rows.filter(x => x.id !== r.id && (x.bw > r.bw || x.gpu > r.gpu) && best(x).price > b)
+    .sort((x, y) => best(x).price - best(y).price);
+  const nextChip = up.find(x => x.chipKey !== r.chipKey);
+  if (nextChip) return nextChip;
+  if (up.length) return up[0];
+  return state.model.rows.filter(x => x.id !== r.id).sort((x, y) => best(y).price - best(x).price)[0];
+}
+
+// ===== Device drawing (isometric, true to scale in inches) =====
+const DIMS = { "Mac mini": { w: 5.0, h: 2.0 }, "Mac Studio": { w: 7.7, h: 3.7 } };
+const C30 = Math.cos(Math.PI / 6), S30 = 0.5;
+const P = (x, y, z) => [(x - y) * C30, (x + y) * S30 - z];
+const pts = a => a.map(p => p.map(n => n.toFixed(3)).join(",")).join(" ");
+function box(product, ox, oy, ghost) {
+  const d = DIMS[product] || DIMS["Mac mini"], W = d.w, D = d.w, H = d.h;
+  const top = [P(0, 0, H), P(W, 0, H), P(W, D, H), P(0, D, H)];
+  const left = [P(0, D, 0), P(W, D, 0), P(W, D, H), P(0, D, H)];
+  const right = [P(W, 0, 0), P(W, D, 0), P(W, D, H), P(W, 0, H)];
+  const vf = 'vector-effect="non-scaling-stroke"';
+  if (ghost) {
+    return `<g transform="translate(${ox} ${oy})" data-prod="${esc(product)}" style="cursor:pointer"><title>Switch to ${esc(product)}</title>
+      <polygon class="ghost" ${vf} points="${pts(top)}"/><polygon class="ghost" ${vf} points="${pts(left)}"/><polygon class="ghost" ${vf} points="${pts(right)}"/>
+      <polygon fill="transparent" points="${pts([P(0,0,H),P(W,0,H),P(W,0,0),P(W,D,0),P(0,D,0),P(0,D,H)])}"/></g>`;
+  }
+  // Front ports sit on the lower-left face (y = D). Local u runs along the face, v runs down from the top edge.
+  const m = `matrix(${C30} ${S30} 0 1 ${(-D * C30).toFixed(3)} ${(D * S30 - H).toFixed(3)})`;
+  const usb = (u, v) => `<rect x="${u}" y="${v}" width="0.36" height="0.13" rx="0.065" fill="var(--port)"/>`;
+  const ports = product === "Mac Studio"
+    ? usb(1.5, 2.55) + usb(2.05, 2.55) + `<rect x="5.2" y="2.58" width="1.05" height="0.07" rx="0.03" fill="var(--port)"/><circle cx="7.15" cy="3.25" r="0.05" fill="var(--good)"/>`
+    : usb(1.25, 1.3) + usb(1.8, 1.3) + `<circle cx="2.5" cy="1.365" r="0.085" fill="var(--port)"/>`;
+  const base = P(W / 2, D / 2, 0);
+  return `<g transform="translate(${ox} ${oy})" data-prod="${esc(product)}">
+    <ellipse cx="${base[0]}" cy="${(base[1] + W * S30 * 0.86).toFixed(2)}" rx="${(W * C30 * 0.95).toFixed(2)}" ry="${(W * S30 * 0.32).toFixed(2)}" fill="var(--ink)" opacity=".10"/>
+    <polygon points="${pts(left)}" fill="var(--metal-right)" stroke="var(--metal-edge)" stroke-width=".6" ${vf} stroke-linejoin="round"/>
+    <polygon points="${pts(right)}" fill="var(--metal-left)" stroke="var(--metal-edge)" stroke-width=".6" ${vf} stroke-linejoin="round"/>
+    <polygon points="${pts(top)}" fill="var(--metal-top)" stroke="var(--metal-edge)" stroke-width=".6" ${vf} stroke-linejoin="round"/>
+    <polyline points="${pts([P(0, D, H), P(W, D, H), P(W, 0, H)])}" fill="none" stroke="var(--surface)" stroke-width="1.2" ${vf} opacity=".7"/>
+    <g transform="${m}">${ports}</g></g>`;
+}
+function stageSVG(product) {
+  const other = product === "Mac Studio" ? "Mac mini" : "Mac Studio";
+  // Mac mini on the left, Mac Studio on the right, front-bottom corners on one ground line.
+  const mini = { x: 4.33 + 0.4, y: 2.7 }, studio = { x: 8.66 + 1.9 + 6.67, y: 0 };
+  const at = p => p === "Mac mini" ? mini : studio;
+  return `<svg class="device" viewBox="0 -4.4 25.4 13.2" role="img" aria-label="${esc(product)} drawn to scale next to the ${esc(other)}">
+    ${box(other, at(other).x, at(other).y, true)}${box(product, at(product).x, at(product).y, false)}</svg>`;
+}
+function iconSVG(product) {
+  // Both icons share one scale, so the size difference is real.
+  return `<svg viewBox="-7.2 -4.2 14.4 12.6" aria-hidden="true">${box(product, 0, product === "Mac Studio" ? 0 : 2.7, false)}</svg>`;
+}
+
+// ===== Preferences strip =====
+function renderPrefs() {
+  const M = state.model, el = document.getElementById("prefs");
+  const has = s => M.rows.some(r => r.prices[s.key] != null);
+  let h = `<span class="lbl">I can buy from</span>`;
+  M.stores.filter(s => !s.msrp).forEach(s => {
+    const ok = has(s), on = ok && !state.off.has(s.key);
+    h += `<button class="chip" data-store="${esc(s.key)}" aria-pressed="${on}" ${ok ? "" : "disabled"}><span class="tick"></span>${esc(s.name)}${ok ? "" : " <small>no prices yet</small>"}</button>`;
+  });
+  if (M.tradeAmt) h += `<button class="chip trade" id="tradeBtn" aria-pressed="${state.trade}"><span class="tick"></span>Trade-in ${fmt$(M.tradeAmt)} <small>at Apple</small></button>`;
+  h += syncHTML();
+  el.innerHTML = h;
+  el.querySelectorAll("[data-store]").forEach(b => b.onclick = () => {
+    const k = b.dataset.store; state.off.has(k) ? state.off.delete(k) : state.off.add(k); persist(); renderAll();
+  });
+  const t = document.getElementById("tradeBtn"); if (t) t.onclick = () => { state.trade = !state.trade; persist(); renderAll(); };
+  const s = document.getElementById("syncBtn"); if (s) s.onclick = manualSync;
+}
+
+// ===== Stage (device + price) =====
+function chipTitle(chip) {
+  const m = chip.match(/^(M\d+)\s*(.*)$/i);
+  return m && m[2] ? `${esc(m[1])} <em>${esc(m[2])}</em>` : esc(chip);
+}
+function renderStage() {
+  const r = current(), b = best(r), msrp = msrpOf(r), el = document.getElementById("stage");
+  const live = offers(r).filter(o => !o.off);
+  const hidden = offers(r).filter(o => o.off).map(o => o.store.short);
+  const missing = state.model.stores.filter(s => r.prices[s.key] == null).map(s => s.short);
+  const lo = live.length ? live[0].price : msrp, hi = Math.max(...live.map(o => o.price), msrp ?? 0);
+  const pos = p => hi > lo ? 4 + 92 * (p - lo) / (hi - lo) : 4;
+  const where = b.stores.length ? b.stores.map(s => `<b>${esc(s.name)}</b>`).join(" or ") : "<b>Apple</b>";
+  const ladder = live.map(o => {
+    const isBest = Math.abs(o.price - lo) < 0.005, x = pos(o.price);
+    const note = isBest ? "Best price" : `+${fmt$(o.price - lo)}`;
+    return `<div class="rung ${isBest ? "best" : ""} ${o.store.msrp ? "msrp" : ""}">
+      <div class="st">${esc(o.store.short)}<small>${o.store.msrp ? "Full price" : o.credit ? "After trade-in" : "&nbsp;"}</small></div>
+      <div class="tr"><div class="fill" style="width:${x}%"></div><div class="pin" style="left:${x}%"></div></div>
+      <div class="pr">${o.credit ? `<s>${fmt$(o.raw)}</s>` : ""}${fmt$(o.price)}<small>${note}</small></div></div>`;
+  }).join("");
+  const sheet = [r.status && `Status: ${esc(r.status)}`, r.notes && esc(r.notes)].filter(Boolean).join(" · ");
+  el.innerHTML = `
+    <div class="eyebrow">${esc(r.product)}</div>
+    <div class="model">${chipTitle(r.chip)}</div>
+    <div class="sub">${chipCores(r)} · ${fmtSize(r.ram)} memory · ${fmtSize(r.ssd)} storage · ${r.bw} GB/s</div>
+    ${stageSVG(r.product)}
+    <div class="scale mono"><span class="${r.product === "Mac mini" ? "on" : ""}">Mac mini · 5″ × 5″ × 2″</span><span>Drawn to scale</span><span class="${r.product === "Mac Studio" ? "on" : ""}">Mac Studio · 7.7″ × 7.7″ × 3.7″</span></div>
+    <div class="pricebox" id="pricebox">
+      <div class="eyebrow">Best price you can get</div>
+      <div class="big num">${b.price == null ? "—" : `<sup>$</sup>${fmt$(b.price).slice(1)}`}</div>
+      <div class="where">at ${where}</div>
+      ${b.save > 0 ? `<span class="save">Save ${fmt$(b.save)} vs Apple’s ${fmt$(msrp)}</span>` : `<span class="save zero">Same as Apple’s price</span>`}
+    </div>
+    <div class="ladder" aria-label="Prices from best to full price">${ladder}</div>
+    ${missing.length || hidden.length ? `<div class="missing">${missing.length ? `No price listed at ${missing.join(", ")}.` : ""} ${hidden.length ? `Not counting ${hidden.join(", ")}.` : ""}</div>` : ""}
+    ${sheet ? `<div class="sheetnote">From your sheet: ${sheet}</div>` : ""}`;
+  el.querySelectorAll("svg [data-prod]").forEach(g => {
+    if (g.dataset.prod !== r.product) g.onclick = () => setCur(snap({ product: g.dataset.prod, ram: r.ram, ssd: r.ssd }).id);
+  });
+  watchPricebox();
+}
+
+// ===== Steps =====
+function optPrice(target, cur) {
+  if (target.id === cur.id) return `<span class="p cur">${fmt$(best(cur).price)} · your build</span>`;
+  const d = best(target).price - best(cur).price;
+  return `<span class="p ${d < 0 ? "down" : "up"}">${Math.abs(d) < 0.5 ? "Same price" : fmtDelta(d)}</span>`;
+}
+function renderSteps() {
+  const M = state.model, r = current(), el = document.getElementById("steps");
+  const prodRows = p => M.rows.filter(x => x.product === p);
+  const chipsOf = p => [...new Map(prodRows(p).map(x => [x.chipKey, x])).values()];
+
+  const prodOpts = M.products.map(p => {
+    const rows = prodRows(p), from = Math.min(...rows.map(x => best(x).price));
+    const chips = [...new Set(rows.map(x => x.chip))];
+    const on = p === r.product;
+    return `<button class="opt prod" aria-pressed="${on}" data-prod="${esc(p)}">${iconSVG(p)}
+      <span class="t">${esc(p)}</span><span class="d">${esc(chips[0])}${chips.length > 1 ? " to " + esc(chips[chips.length - 1]) : ""}</span>
+      <span class="p ${on ? "cur" : ""}">From ${fmt$(from)}</span></button>`;
+  }).join("");
+
+  const chipOpts = chipsOf(r.product).map(c => {
+    const t = snap({ product: r.product, chipKey: c.chipKey, ram: r.ram, ssd: r.ssd });
+    const also = (t.ram !== r.ram || t.ssd !== r.ssd) ? `<span class="also">Comes with ${shortCfg(t)}</span>` : "";
+    return `<button class="opt" aria-pressed="${c.chipKey === r.chipKey}" data-id="${esc(t.id)}">
+      <span class="t"><b>${esc(c.chip)}</b></span><span class="d">${t.cpu}-core CPU, ${t.gpu}-core GPU<br>${t.bw} GB/s memory bandwidth</span>${also}${optPrice(t, r)}</button>`;
+  }).join("");
+
+  const sameChip = M.rows.filter(x => x.chipKey === r.chipKey);
+  const rams = [...new Set(sameChip.map(x => x.ram))].sort((a, b) => a - b);
+  const ramOpts = rams.map(v => {
+    const t = snap({ product: r.product, chipKey: r.chipKey, ram: v, ssd: r.ssd });
+    const bwNote = t.bw !== r.bw ? `${t.bw} GB/s bandwidth` : "Unified memory";
+    const also = t.ssd !== r.ssd ? `<span class="also">Only with ${fmtSize(t.ssd)} storage</span>` : "";
+    return `<button class="opt" aria-pressed="${v === r.ram}" data-id="${esc(t.id)}"><span class="t">${fmtSize(v)}</span><span class="d">${bwNote}</span>${also}${optPrice(t, r)}</button>`;
+  }).join("");
+
+  const ssds = [...new Set(sameChip.map(x => x.ssd))].sort((a, b) => a - b);
+  const ssdOpts = ssds.map(v => {
+    const t = snap({ product: r.product, chipKey: r.chipKey, ram: r.ram, ssd: v });
+    const exact = t.ssd === v ? t : sameChip.find(x => x.ssd === v);
+    const also = exact.ram !== r.ram ? `<span class="also">Only with ${fmtSize(exact.ram)} memory</span>` : "";
+    return `<button class="opt" aria-pressed="${v === r.ssd}" data-id="${esc(exact.id)}"><span class="t">${fmtSize(v)}</span><span class="d">SSD storage</span>${also}${optPrice(exact, r)}</button>`;
+  }).join("");
+
+  const max = k => Math.max(...M.rows.map(x => x[k]));
+  const meter = (k, label, val, v) => {
+    const n = 12, on = Math.max(1, Math.round(n * v / max(k)));
+    return `<div class="meter"><span class="k">${label}</span><span class="segs" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i class="${i < on ? "on" : ""}"></i>`).join("")}</span><span class="v">${val}</span></div>`;
+  };
+
+  el.innerHTML = `
+    <div class="card step"><h3><span class="n">01</span>Machine</h3><div class="opts two">${prodOpts}</div></div>
+    <div class="card step"><h3><span class="n">02</span>Chip<span class="hint">Price change vs. your build</span></h3><div class="opts">${chipOpts}</div></div>
+    <div class="card step"><h3><span class="n">03</span>Memory</h3><div class="opts">${ramOpts}</div></div>
+    <div class="card step"><h3><span class="n">04</span>Storage</h3><div class="opts">${ssdOpts}</div></div>
+    <div class="card specs">
+      <div class="eyebrow">Your build against the most in the lineup</div>
+      ${meter("cpu", "CPU cores", r.cpu + " cores", r.cpu)}
+      ${meter("gpu", "GPU cores", r.gpu + " cores", r.gpu)}
+      ${meter("ram", "Memory", fmtSize(r.ram), r.ram)}
+      ${meter("ssd", "Storage", fmtSize(r.ssd), r.ssd)}
+      ${meter("bw", "Bandwidth", r.bw + " GB/s", r.bw)}
+      <div class="specfoot">A full bar is the top of the lineup: ${max("cpu")} CPU cores, ${max("gpu")} GPU cores, ${fmtSize(max("ram"))}, ${fmtSize(max("ssd"))}, ${max("bw")} GB/s.</div>
+    </div>`;
+  el.querySelectorAll("[data-prod]").forEach(b => b.onclick = () => {
+    if (b.dataset.prod !== r.product) setCur(snap({ product: b.dataset.prod, ram: r.ram, ssd: r.ssd }).id);
+  });
+  el.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { if (b.dataset.id !== r.id) setCur(b.dataset.id); });
+}
+
+// ===== Mobile price bar =====
+function renderBar() {
+  const r = current(), b = best(r);
+  document.getElementById("mbarC").textContent = `${r.product} · ${r.chip} · ${shortCfg(r)}`;
+  document.getElementById("mbarP").innerHTML = `${fmt$(b.price)}<small>${b.stores.length ? esc(b.stores[0].short) : "Apple"}</small>`;
+  const s = document.getElementById("mbarS");
+  s.textContent = b.save > 0 ? `Save ${fmt$(b.save)}` : "Full price"; s.className = "save" + (b.save > 0 ? "" : " zero");
+}
+let pbObs;
+function watchPricebox() {
+  if (!("IntersectionObserver" in window)) return;
+  pbObs?.disconnect();
+  const bar = document.getElementById("mbar");
+  pbObs = new IntersectionObserver(es => es.forEach(e => bar.classList.toggle("hide", e.isIntersecting)), { threshold: 0.2 });
+  const pb = document.getElementById("pricebox"); if (pb) pbObs.observe(pb);
+}
+
+// ===== Map =====
+const METRICS = {
+  bw:  { label: "Bandwidth", noun: "memory bandwidth", get: r => r.bw,  fmt: v => v + " GB/s" },
+  gpu: { label: "GPU cores", noun: "GPU cores",        get: r => r.gpu, fmt: v => v + " cores" },
+  cpu: { label: "CPU cores", noun: "CPU cores",        get: r => r.cpu, fmt: v => v + " cores" },
+  ram: { label: "Memory",    noun: "memory",           get: r => r.ram, fmt: fmtSize },
+  ssd: { label: "Storage",   noun: "storage",          get: r => r.ssd, fmt: fmtSize }
+};
+function frontierIds(metric) {
+  const f = METRICS[metric].get, ids = new Set(); let top = -Infinity;
+  state.model.rows.slice().sort((a, b) => best(a).price - best(b).price || f(b) - f(a))
+    .forEach(r => { if (f(r) > top) { ids.add(r.id); top = f(r); } });
+  return ids;
+}
+function niceStep(max) { const raw = max / 6, p = 10 ** Math.floor(Math.log10(raw)); return [1, 2, 2.5, 5, 10].map(m => m * p).find(s => s >= raw); }
+function renderMetricSeg() {
+  const el = document.getElementById("metricSeg");
+  el.innerHTML = Object.entries(METRICS).map(([k, m]) => `<button data-m="${k}" aria-pressed="${state.metric === k}">${m.label}</button>`).join("");
+  el.querySelectorAll("button").forEach(b => b.onclick = () => { state.metric = b.dataset.m; persist(); renderMetricSeg(); renderMap(); });
+}
+function renderMap() {
+  const M = state.model, host = document.getElementById("mapHost"), met = METRICS[state.metric];
+  const W = Math.max(300, Math.round(host.clientWidth || 700)), H = W < 560 ? 330 : 420;
+  const m = { l: 46, r: 14, t: 16, b: 30 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const bp = M.rows.map(r => best(r).price), ms = M.rows.map(r => msrpOf(r) || 0);
+  const lo = Math.min(...bp) * 0.9, hi = Math.max(...ms, ...bp) * 1.05;
+  const X = v => m.l + iw * (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo));
+  const vmax = Math.max(...M.rows.map(met.get)) * 1.08, step = niceStep(vmax);
+  const Y = v => m.t + ih * (1 - v / vmax);
+  let g = "";
+  for (let v = 0; v <= vmax; v += step) g += `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${m.l - 8}" y="${Y(v) + 3.5}" text-anchor="end">${state.metric === "ssd" || state.metric === "ram" ? (v >= 1024 ? v / 1024 + "T" : v) : v}</text>`;
+  [500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 8000].filter(v => v > lo && v < hi).forEach(v => {
+    g += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${H - m.b}" opacity=".5"/><text x="${X(v)}" y="${H - m.b + 18}" text-anchor="middle">${v >= 1000 ? "$" + v / 1000 + "k" : "$" + v}</text>`;
+  });
+  g += `<text x="${m.l}" y="${m.t - 4}" style="font-size:10px">${esc(met.label.toUpperCase())}${state.metric === "bw" ? " (GB/s)" : state.metric === "ram" || state.metric === "ssd" ? " (GB)" : ""}</text>`;
+  const fr = frontierIds(state.metric);
+  const fpts = M.rows.filter(r => fr.has(r.id)).sort((a, b) => best(a).price - best(b).price);
+  let path = "";
+  fpts.forEach((r, i) => { const x = X(best(r).price), y = Y(met.get(r)); path += i ? ` H${x.toFixed(1)} V${y.toFixed(1)}` : `M${x.toFixed(1)} ${y.toFixed(1)}`; });
+  g += `<path class="front" d="${path}"/>`;
+  const order = M.rows.slice().sort((a, b) => (a.id === state.cur) - (b.id === state.cur));
+  order.forEach(r => {
+    const b = best(r), x = X(b.price), y = Y(met.get(r)), xm = X(msrpOf(r) || b.price);
+    const mk = r.product === "Mac Studio" ? `<rect class="mk-studio" x="${x - 5}" y="${y - 5}" width="10" height="10" rx="1.5"/>` : `<circle class="mk-mini" cx="${x}" cy="${y}" r="5.5"/>`;
+    g += `<g class="pt" data-id="${esc(r.id)}" tabindex="0" role="button" aria-label="${esc(fullName(r))}, ${shortCfg(r)}, ${fmt$(b.price)}">
+      <title>${esc(fullName(r))} · ${shortCfg(r)} · ${fmt$(b.price)}</title>
+      ${xm > x + 1 ? `<line class="whisk" x1="${x}" x2="${xm}" y1="${y}" y2="${y}"/><line class="whisk" x1="${xm}" x2="${xm}" y1="${y - 3}" y2="${y + 3}"/>` : ""}
+      ${mk}<circle class="hit" cx="${x}" cy="${y}" r="13"/>
+      ${r.id === state.cur ? `<circle class="ring" cx="${x}" cy="${y}" r="10"/>` : ""}
+      ${r.id === state.rival ? `<circle class="ring rival" cx="${x}" cy="${y}" r="10"/>` : ""}
+      ${r.id === state.pick ? `<circle class="ring pick" cx="${x}" cy="${y}" r="14"/>` : ""}</g>`;
+  });
+  host.innerHTML = `<svg class="mapsvg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Every configuration by best price and ${esc(met.noun)}">${g}</svg>`;
+  host.querySelectorAll(".pt").forEach(p => {
+    const go = () => { state.pick = p.dataset.id; renderMap(); };
+    p.onclick = go; p.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  document.getElementById("legend").innerHTML = `
+    <span><i class="lg"></i>Mac mini</span><span><i class="lg sq"></i>Mac Studio</span>
+    <span><i class="lg rg"></i>Your build</span><span><i class="lg ln"></i>Most for the money</span>
+    <span><i class="lg wh"></i>Discount: best price to Apple’s price</span>`;
+  renderPick(fr);
+}
+function renderPick(fr) {
+  const el = document.getElementById("pick"), r = state.model.byId[state.pick];
+  if (!r) { el.innerHTML = `<div class="pick"><span class="nm" style="font-weight:500;color:var(--ink-2)">Tap any dot to see what it is and what it costs.</span></div>`; return; }
+  const b = best(r);
+  el.innerHTML = `<div class="pick">
+    <div class="nm">${esc(fullName(r))} · ${shortCfg(r)} ${fr.has(r.id) ? `<span class="badge">Most for the money</span>` : ""}
+      <small>${fmt$(b.price)} at ${b.stores.map(s => esc(s.short)).join(" or ") || "Apple"}${b.save > 0 ? ` · ${fmt$(b.save)} under Apple` : ""} · ${METRICS[state.metric].fmt(METRICS[state.metric].get(r))}</small></div>
+    <div class="acts">${r.id === state.cur ? `<span class="badge" style="background:var(--accent-soft);color:var(--accent)">Your build</span>` :
+      `<button class="btn" id="pkCmp">Compare</button><button class="btn pri" id="pkBuild">Build this</button>`}</div></div>`;
+  const c = document.getElementById("pkCmp"), bb = document.getElementById("pkBuild");
+  if (c) c.onclick = () => { state.rival = r.id; persist(); renderAll(); document.getElementById("compare").scrollIntoView(); };
+  if (bb) bb.onclick = () => { setCur(r.id, { keepPick: true }); document.getElementById("build").scrollIntoView(); };
+}
+
+// ===== Compare =====
+const SPECS = [
+  { k: "cpu", label: "CPU cores", fmt: v => v, unit: "cores" },
+  { k: "gpu", label: "GPU cores", fmt: v => v, unit: "cores" },
+  { k: "ram", label: "Memory", fmt: fmtSize, unit: "" },
+  { k: "ssd", label: "Storage", fmt: fmtSize, unit: "" },
+  { k: "bw", label: "Bandwidth", fmt: v => v, unit: "GB/s" }
+];
+const NOUN = { cpu: "CPU cores", gpu: "GPU cores", ram: "memory", ssd: "storage", bw: "memory bandwidth" };
+function phrase(k, a, b) {
+  const q = b / a;
+  if (q >= 1.9) return `${(Math.round(q * 10) / 10).toString().replace(/\.0$/, "")}× the ${NOUN[k]}`;
+  if (q > 1) return `${Math.round((q - 1) * 100)}% more ${NOUN[k]}`;
+  if (q <= 0.55) return `${q === 0.5 ? "half" : Math.round((1 - q) * 100) + "% less"} ${q === 0.5 ? "the " : ""}${NOUN[k]}`;
+  return `${Math.round((1 - q) * 100)}% less ${NOUN[k]}`;
+}
+const list = a => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+function sideHTML(r, tag, cls) {
+  const b = best(r), ms = msrpOf(r);
+  return `<div class="card side ${cls}"><span class="tag">${tag}</span><span class="nm">${esc(r.product)} ${esc(r.chip)}</span>
+    <span class="cf">${chipCores(r)}<br>${shortCfg(r)} · ${r.bw} GB/s</span>
+    <span class="pp num">${fmt$(b.price)} <small>at ${b.stores.map(s => esc(s.short)).join(" or ") || "Apple"}${b.save > 0 ? ` · Apple ${fmt$(ms)}` : ""}</small></span>`;
+}
+function renderCompare() {
+  const M = state.model, A = current(), B = M.byId[state.rival] || defaultRival(A);
+  const groups = [...new Map(M.rows.map(r => [r.chipKey, r])).values()];
+  const opts = groups.map(g => `<optgroup label="${esc(g.product)} · ${esc(g.chip)} ${g.cpu}/${g.gpu}">` +
+    M.rows.filter(r => r.chipKey === g.chipKey).map(r => `<option value="${esc(r.id)}" ${r.id === B.id ? "selected" : ""}>${shortCfg(r)} · ${fmt$(best(r).price)}${r.id === A.id ? " (your build)" : ""}</option>`).join("") + `</optgroup>`).join("");
+  document.getElementById("vs").innerHTML = sideHTML(A, "Your build", "a") + `</div>` +
+    `<div class="vsmid"><button id="swap" aria-label="Make this my build" title="Make the other one my build">⇄</button></div>` +
+    sideHTML(B, "Against", "b") + `<label class="mono" for="rivalSel" style="margin-top:6px;color:var(--muted)">Compare with</label><select id="rivalSel">${opts}</select></div>`;
+  document.getElementById("rivalSel").onchange = e => { state.rival = e.target.value; persist(); renderAll(); };
+  document.getElementById("swap").onclick = () => { const a = A.id; state.cur = B.id; state.rival = a; persist(); renderAll(); };
+
+  const pa = best(A).price, pb = best(B).price, d = pb - pa;
+  const gains = SPECS.filter(s => B[s.k] > A[s.k]).map(s => phrase(s.k, A[s.k], B[s.k]));
+  const losses = SPECS.filter(s => B[s.k] < A[s.k]).map(s => phrase(s.k, A[s.k], B[s.k]));
+  const who = `the ${esc(B.product)} ${esc(B.chip)}`;
+  let v;
+  if (A.id === B.id) v = "Pick a different configuration to compare.";
+  else if (d > 0.5) v = `For <span class="w">${fmt$(d)} more</span>, ${who} ${gains.length ? `gets you <span class="g">${list(gains)}</span>` : "gives you nothing extra on paper"}${losses.length ? `, but you give up ${list(losses)}` : ""}.`;
+  else if (d < -0.5) v = `${who.charAt(0).toUpperCase() + who.slice(1)} costs <span class="g">${fmt$(-d)} less</span>${losses.length ? `, and you give up <span class="w">${list(losses)}</span>` : ""}${gains.length ? `${losses.length ? ", while still getting" : " and still gets you"} <span class="g">${list(gains)}</span>` : ""}.`;
+  else if (!gains.length && !losses.length) v = "Same best price and the same specs.";
+  else v = `Same best price. ${gains.length ? `${who} gets you <span class="g">${list(gains)}</span>` : ""}${losses.length ? `${gains.length ? ", but" : `${who}`} gives up ${list(losses)}` : ""}.`;
+  document.getElementById("verdict").innerHTML = v;
+
+  const bar = (a, b, cost) => {
+    if (a === b || !a || !b) return `<div class="dtrack"><span class="dlab" style="left:calc(50% + 8px)">Same</span></div>`;
+    const w = Math.min(Math.abs(Math.log2(b / a)), 2) / 2 * 48 + 2, up = b > a;
+    const cls = cost ? "cost" : up ? "gain" : "loss";
+    return `<div class="dtrack"><div class="dbar ${cls}" style="${up ? `left:50%` : `right:50%`};width:${w}%"></div>
+      <span class="dlab" style="${up ? `left:calc(50% + ${w}% + 6px)` : `right:calc(50% + ${w}% + 6px)`}">LBL</span></div>`;
+  };
+  let rows = SPECS.map(s => {
+    const a = A[s.k], b = B[s.k], diff = b - a;
+    const lbl = s.k === "ram" || s.k === "ssd" ? (diff > 0 ? "+" : "−") + fmtSize(Math.abs(diff)) : (diff > 0 ? "+" : "−") + Math.abs(diff) + (s.unit ? " " + s.unit : "");
+    return `<div class="drow ${a === b ? "same" : ""}"><span class="k">${s.label}</span><span class="a num">${s.fmt(a)}</span>${bar(a, b).replace("LBL", lbl)}<span class="b num">${s.fmt(b)}</span></div>`;
+  }).join("");
+  const ma = msrpOf(A), mb = msrpOf(B);
+  rows += `<div class="drow ${pa === pb ? "same" : ""}"><span class="k">Best price<small>what you'd pay</small></span><span class="a num">${fmt$(pa)}</span>${bar(pa, pb, true).replace("LBL", fmtDelta(d))}<span class="b num">${fmt$(pb)}</span></div>`;
+  rows += `<div class="drow ${ma === mb ? "same" : ""}"><span class="k">Apple price<small>full price</small></span><span class="a num">${fmt$(ma)}</span>${bar(ma, mb, true).replace("LBL", fmtDelta(mb - ma))}<span class="b num">${fmt$(mb)}</span></div>`;
+  document.getElementById("deltas").innerHTML = rows;
+}
+
+// ===== Price sheet =====
+function renderSortSeg() {
+  const el = document.getElementById("sortSeg");
+  const S = { lineup: "Lineup", price: "Lowest price", save: "Biggest savings" };
+  el.innerHTML = Object.entries(S).map(([k, l]) => `<button data-s="${k}" aria-pressed="${state.sort === k}">${l}</button>`).join("");
+  el.querySelectorAll("button").forEach(b => b.onclick = () => { state.sort = b.dataset.s; persist(); renderSortSeg(); renderTable(); });
+}
+function renderTable() {
+  const M = state.model;
+  const cols = M.stores.filter(s => M.rows.some(r => r.prices[s.key] != null))
+    .sort((a, b) => (a.apple - b.apple) || (a.msrp - b.msrp));
+  let rows = M.rows.slice();
+  if (state.sort === "price") rows.sort((a, b) => best(a).price - best(b).price);
+  if (state.sort === "save") rows.sort((a, b) => best(b).save - best(a).save || best(a).price - best(b).price);
+  let h = `<thead><tr><th>Configuration</th><th>Best</th><th>You save</th>${cols.map(s => `<th>${esc(s.short)}</th>`).join("")}<th>Bandwidth</th></tr></thead><tbody>`;
+  let lastChip = null;
+  rows.forEach(r => {
+    if (state.sort === "lineup" && r.chipKey !== lastChip) {
+      h += `<tr class="grp"><td colspan="${cols.length + 4}">${esc(r.product)} · ${esc(r.chip)} · ${chipCores(r)}</td></tr>`; lastChip = r.chipKey;
+    }
+    const b = best(r), of = offers(r);
+    h += `<tr data-id="${esc(r.id)}" class="${r.id === state.cur ? "cur" : ""}">
+      <td><span class="cfg">${state.sort === "lineup" ? shortCfg(r) : `${esc(r.product)} ${esc(r.chip)} ${r.cpu}/${r.gpu}`}<small>${state.sort === "lineup" ? (r.status || r.notes ? esc([r.status, r.notes].filter(Boolean).join(" · ")) : "&nbsp;") : shortCfg(r)}</small></span></td>
+      <td><span class="bp">${fmt$(b.price)}</span></td><td class="sv">${b.save > 0 ? fmt$(b.save) : "—"}</td>
+      ${cols.map(s => {
+        const o = of.find(o => o.store.key === s.key);
+        if (!o) return `<td class="na">—</td>`;
+        const isB = !o.off && b.stores.includes(s);
+        return `<td style="${o.off ? "opacity:.4" : ""}">${isB ? `<span class="bp">${fmt$(o.price)}</span>` : fmt$(o.price)}${o.credit ? "*" : ""}</td>`;
+      }).join("")}
+      <td>${r.bw} GB/s</td></tr>`;
+  });
+  document.getElementById("tbl").innerHTML = h + "</tbody>";
+  document.querySelectorAll("#tbl tbody tr[data-id]").forEach(tr => tr.onclick = () => { setCur(tr.dataset.id); document.getElementById("build").scrollIntoView(); });
+  const empty = M.stores.filter(s => !cols.includes(s)).map(s => s.name);
+  document.getElementById("tfoot").innerHTML = [
+    "Tap a row to load it into the builder.",
+    "“You save” is Apple’s price minus the best price from the stores you’ve ticked. The sheet’s own Diff column compares against a different store on different rows, so a few of its numbers won’t match.",
+    state.trade && M.tradeAmt ? `* Includes your ${fmt$(M.tradeAmt)} trade-in, applied at Apple and Apple Education.` : "",
+    empty.length ? `${list(empty)} ${empty.length > 1 ? "have" : "has"} no prices in the sheet yet.` : ""
+  ].filter(Boolean).join(" ");
+}
+
+// ===== Live sync with the Google Sheet =====
+const sync = { state: "snap", at: null, msg: "", action: null, mcp: null, unwatch: null };
+function syncHTML() {
+  const t = sync.at ? new Date(sync.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
+  const label = sync.state === "live" ? `<b>Live</b> from your sheet · ${t}` : sync.state === "busy" ? "Reading your sheet…" : `<b>Snapshot</b> · ${SNAPSHOT_DATE}`;
+  return `<button class="sync" id="syncBtn" data-state="${sync.state}" ${sync.mcp ? `title="Refresh from your Google Sheet"` : `disabled style="cursor:default" title="Prices as of ${SNAPSHOT_DATE}"`}><span class="dot"></span><span>${label}</span></button>`;
+}
+function setSync(s, msg = "", action = null) {
+  sync.state = s; sync.msg = msg; sync.action = action;
+  const btn = document.getElementById("syncBtn");
+  if (btn) btn.outerHTML = syncHTML();
+  const b2 = document.getElementById("syncBtn"); if (b2) b2.onclick = manualSync;
+  const n = document.getElementById("syncnote");
+  n.hidden = !msg; n.innerHTML = msg ? esc(msg) + (action ? ` <button id="syncAct">${esc(action)}</button>` : "") : "";
+  const a = document.getElementById("syncAct"); if (a) a.onclick = manualSync;
+}
+function payloadText(res) {
+  const p = res?.payload;
+  if (typeof p === "string") return p;
+  if (p && typeof p.fileContent === "string") return p.fileContent;
+  const t = (res?.content || []).find(c => c.type === "text"); return t ? t.text : "";
+}
+function useSnapshot() { if (state.source !== "snapshot") applyModel(buildModel(SNAPSHOT), "snapshot"); }
+function onSyncEvent(ev) {
+  if (ev.type === "data") {
+    const parsed = parseSheetText(payloadText(ev.result)), model = parsed && buildModel(parsed);
+    if (!model) { useSnapshot(); setSync("warn", `Your sheet's columns didn't match what this page expects, so it's showing the ${SNAPSHOT_DATE} snapshot.`); return; }
+    sync.at = ev.result.cache?.storedAt || Date.now();
+    applyModel(model, "live"); setSync("live"); return;
+  }
+  const e = ev.error || {}, code = e.code;
+  if (code === "needs_reauth") { useSnapshot(); setSync("warn", "Reconnect Google Drive in claude.ai Settings → Connectors to see live prices from your sheet."); }
+  else if (code === "server_not_connected" || code === "selection_required" || code === "server_not_found") { useSnapshot(); setSync("snap", "Add Google Drive in claude.ai Settings → Connectors to keep these prices in step with your sheet."); }
+  else if (code === "approval_required") { useSnapshot(); setSync("snap", "Live prices need your OK to read the sheet.", "Allow and refresh"); }
+  else if (code === "not_in_manifest" || code === "blocked_by_policy") { useSnapshot(); setSync("snap"); }
+  else if (["not_granted", "capability_disabled", "capability_removed"].includes(code)) { sync.mcp = null; useSnapshot(); setSync("snap"); }
+  else if (code === "tool_error") setSync(state.source === "live" ? "live" : "warn", "Google Drive couldn't read the sheet: " + (e.message || "unknown error"));
+  else if (code === "cancelled") setSync(state.source === "live" ? "live" : "snap");
+  else setSync(state.source === "live" ? "live" : "warn", "Couldn't reach Google Drive just now. Showing the last prices it had.", sync.mcp ? "Try again" : null);
+}
+async function manualSync() {
+  if (!sync.mcp) return;
+  setSync("busy");
+  try {
+    const res = await sync.mcp.callTool("Google Drive", "read_file_content", { fileId: SHEET_ID }, { cache: { refresh: true, gcTime: 86400000 } });
+    onSyncEvent({ type: "data", result: res });
+  } catch (err) { onSyncEvent({ type: "error", error: err }); }
+}
+async function initSync() {
+  if (!window.claude || typeof window.claude.use !== "function") return;
+  let mcp = null; try { mcp = await window.claude.use("mcp"); } catch {}
+  if (!mcp) return;
+  sync.mcp = mcp; setSync("busy");
+  sync.unwatch = mcp.watchTool("Google Drive", "read_file_content", { fileId: SHEET_ID }, onSyncEvent,
+    { cache: { staleTime: 60000, gcTime: 86400000 }, refetchInterval: 300000 });
+}
+
+// ===== Boot =====
+function applyModel(model, source) {
+  state.model = model; state.source = source;
+  if (!model.byId[state.cur]) state.cur = model.rows[0].id;
+  if (!model.byId[state.rival] || state.rival === state.cur) state.rival = defaultRival(current()).id;
+  if (state.pick && !model.byId[state.pick]) state.pick = null;
+  renderAll();
+}
+function renderAll() {
+  renderPrefs(); renderStage(); renderSteps(); renderBar(); renderMetricSeg(); renderMap(); renderCompare(); renderSortSeg(); renderTable();
+  document.getElementById("foot").innerHTML = `Prices from your Google Sheet <a href="${SHEET_URL}" target="_blank" rel="noopener" style="color:inherit">MacMiniAnalysis</a>, WORKING SHEET tab. ${state.source === "live" ? "Synced live." : `Snapshot taken ${SNAPSHOT_DATE}.`}`;
+}
+function initNav() {
+  const links = [...document.querySelectorAll("#nav a")];
+  if (!("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
+  }), { rootMargin: "-45% 0px -50% 0px" });
+  ["build", "map", "compare", "prices"].forEach(id => io.observe(document.getElementById(id)));
+}
+applyModel(buildModel(SNAPSHOT), "snapshot");
+initNav();
+let lastW = 0;
+if ("ResizeObserver" in window) new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w && w !== lastW) { lastW = w; renderMap(); } }).observe(document.getElementById("mapHost"));
+initSync();
+</script>
+</body>
+</html>
