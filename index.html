@@ -322,6 +322,32 @@ section.ruled{border-top:1px solid var(--hair-2)}
 .howbody{display:grid;gap:10px;margin-top:12px;max-width:72ch}
 .howbody p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.5}
 .howbody b{color:var(--ink)}
+
+/* ---------- add prices ---------- */
+#add{border-top:1px solid var(--hair-2)}
+.entry{background:var(--bg-alt);border-radius:18px;padding:22px}
+.eform{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px 16px;align-items:end;margin-top:18px}
+.fld{display:grid;gap:6px;min-width:0}
+.fld.wide{grid-column:1/-1}
+.fld>span:first-child{font-size:12px;font-weight:600;color:var(--muted)}
+.fld input,.fld select{width:100%;font:inherit;font-size:16px;padding:11px 12px;border-radius:12px;border:1px solid var(--hair);background:var(--tile);color:var(--ink);min-width:0}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.money{position:relative;display:block}
+.money i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted);font-size:16px}
+.money input{padding-left:24px}
+.eform .btn.pri{justify-self:start;padding:11px 22px;font-size:15px}
+.fhint{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.fmsg{margin:12px 0 0;font-size:14px;color:var(--green);min-height:1.2em}
+.elist{margin-top:22px}
+.elhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;font-size:15px;font-weight:600;padding-bottom:10px;border-bottom:1px solid var(--hair)}
+.elhead .acts{display:flex;gap:8px}
+.erow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--hair-2)}
+.erow .el{font-size:15px;min-width:0}
+.erow .el small{display:block;font-size:13px;color:var(--muted)}
+.erow .ed{font-size:12px;color:var(--faint)}
+.empty{font-size:14px;color:var(--muted);padding:6px 0}
+.copybox{display:block;width:100%;margin-top:8px;font:12px ui-monospace,Menlo,monospace;padding:10px;border-radius:10px;border:1px solid var(--hair);background:var(--tile);color:var(--ink)}
+td.mine::after,.cfg.mine::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-left:6px;vertical-align:2px}
 </style>
 
 </head>
@@ -336,6 +362,7 @@ section.ruled{border-top:1px solid var(--hair-2)}
       <a href="#value">Value</a>
       <a href="#compare">Compare</a>
       <a href="#prices">Prices</a>
+      <a href="#add">Add</a>
     </nav>
     <button class="iconbtn" id="themeBtn" aria-label="Switch to dark appearance"></button>
     <button class="iconbtn menubtn" id="menuBtn" aria-label="Show sections" aria-expanded="false">
@@ -422,6 +449,23 @@ section.ruled{border-top:1px solid var(--hair-2)}
     </div>
   </section>
 
+  <section id="add">
+    <div class="wrap">
+      <div class="shead">
+        <div>
+          <h2>Add a price. <span>Or a whole new configuration.</span></h2>
+          <p>Spotted a deal? Enter it here and every section updates: best price, value ranking, compare. Entries stay in this browser. Use “Copy for my sheet” to move them into your Google Sheet.</p>
+        </div>
+      </div>
+      <div class="entry">
+        <div class="seg" id="entrySeg" role="group" aria-label="What to add"></div>
+        <form class="eform" id="entryForm" novalidate></form>
+        <p class="fmsg" id="entryMsg" role="status"></p>
+      </div>
+      <div class="elist" id="entryList"></div>
+    </div>
+  </section>
+
   <footer><div class="wrap" id="foot"></div></footer>
 </main>
 
@@ -439,35 +483,35 @@ section.ruled{border-top:1px solid var(--hair-2)}
 // ===== Source sheet =====
 const SHEET_ID = "1-zCjxMFzdce7GhrvpZYl-LlzJzS5irlFXbYTvmeD1nM";
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/edit";
-const SNAPSHOT_DATE = "Oct 13, 2026";
+const SNAPSHOT_DATE = "Oct 19, 2026";
 // Snapshot of the WORKING SHEET tab, used until (or unless) the live read succeeds.
 const SNAPSHOT = {
-  headers: ["Category","Product","CPU","GPU","Ram","SSD","Mem Bandwidth","Microcenter","BestBuy","Manufacturer","Education","Diff (L - H)","Costco","Trade in $565","Status","Notes"],
+  headers: ["Category","Product","CPU","GPU","Ram","SSD","Mem Bandwidth","Microcenter","Manufacturer","Education","Diff (L - H)","Costco","Trade in $565","Status","Notes"],
   rows: [
-    ["Electronics","Mac Mini","M6 12","12","16gb","256gb","153 GB/s","$699.00","","$899.00","$799.00","$200.00","$779.99","$234.00","",""],
-    ["Electronics","Mac Mini","M6 12","12","16gb","512gb","153 GB/s","$999.00","","$1,099.00","$999.00","$100.00","$949.99","$434.00","",""],
-    ["Electronics","Mac Mini","M6 12","12","16gb","1tb","153 GB/s","","","$1,399.00","$1,269.00","$130.00","","","",""],
-    ["Electronics","Mac Mini","M6 12","12","24gb","512gb","170 GB/s","$1,149.00","","$1,299.00","$1,199.00","$100.00","$1,149.99","","",""],
-    ["Electronics","Mac Mini","M6 12","12","24gb","1tb","170 GB/s","","","$1,599.00","$1,469.00","$130.00","","","",""],
-    ["Electronics","Mac Mini","M6 12","12","32gb","512gb","170 GB/s","","","$1,499.00","$1,379.00","$120.00","","","",""],
-    ["Electronics","Mac Mini","M6 12","12","32gb","1tb","170 GB/s","","","$1,799.00","$1,649.00","$150.00","","","",""],
-    ["Electronics","Mac Mini","M4 Pro 12","16","24gb","512gb","273 GB/s","$1,299.00","","$1,599.00","","$399.03","$1,199.97","","",""],
-    ["Electronics","Mac Mini","M4 Pro 12","16","48gb","512gb","273 GB/s","$1,799.00","","$2,199.00","","$400.00","","","",""],
-    ["Electronics","Mac Mini","M5 Pro 15","16","24gb","512gb","307 GB/s","$1,499.00","","$1,699.00","$1,599.00","$200.00","$1,549.99","","",""],
-    ["Electronics","Mac Mini","M5 Pro 15","16","24gb","1tb","307 GB/s","","","$1,999.00","$1,869.00","$130.00","","","",""],
-    ["Electronics","Mac Mini","M5 Pro 15","16","48gb","512gb","307 GB/s","","","$2,299.00","$2,139.00","$160.00","","","",""],
-    ["Electronics","Mac Mini","M5 Pro 15","16","48gb","1tb","307 GB/s","","","$2,599.00","$2,409.00","$190.00","","","",""],
-    ["Electronics","Mac Mini","M5 Pro 18","20","24gb","512gb","307 GB/s","","","$1,899.00","$1,799.00","$100.00","","","",""],
-    ["Electronics","Mac Mini","M5 Pro 18","20","48gb","512gb","307 GB/s","","","$2,499.00","$2,319.00","$180.00","","","",""],
-    ["Electronics","Mac Mini","M5 Pro 18","20","48gb","1tb","307 GB/s","","","$2,799.00","$2,589.00","$210.00","","","",""],
-    ["Electronics","Mac Studio","M5 Max 18","32","36gb","512gb","460 GB/s","$2,299.00","","$2,499.00","$2,299.00","$200.00","$2,299.00","","",""],
-    ["Electronics","Mac Studio","M5 Max 18","32","36gb","1tb","460 GB/s","","","$2,799.00","$2,569.00","$230.00","","","",""],
-    ["Electronics","Mac Studio","M5 Max 18","40","48gb","512gb","614 GB/s","","","$3,099.00","$2,839.00","$260.00","","","",""],
-    ["Electronics","Mac Studio","M5 Max 18","40","48gb","1tb","614 GB/s","$3,399.00","","$3,399.00","$3,109.00","$290.00","","","",""],
-    ["Electronics","Mac Studio","M5 Max 18","40","64gb","512gb","614 GB/s","","","$3,399.00","$3,199.00","$200.00","","","",""],
-    ["Electronics","Mac Studio","M5 Max 18","40","64gb","1tb","614 GB/s","","","$3,799.00","$3,460.00","$339.00","","","",""],
-    ["Electronics","Mac Studio","M5 Ultra 30","64","96gb","1tb","1200 GB/s","","","$5,499.00","$5,099.00","$400.00","","","",""],
-    ["Electronics","Mac Studio","M5 Ultra 30","64","96gb","2tb","1200 GB/s","","","$5,999.00","$5,499.00","$500.00","","","",""]
+    ["Electronics","Mac Mini","M6 12","12","16gb","256gb","153 GB/s","$699.00","$899.00","$799.00","$200.00","$779.99","$234.00","",""],
+    ["Electronics","Mac Mini","M6 12","12","16gb","512gb","153 GB/s","$999.00","$1,099.00","$999.00","$100.00","$949.99","$434.00","",""],
+    ["Electronics","Mac Mini","M6 12","12","16gb","1tb","153 GB/s","","$1,399.00","$1,269.00","$130.00","","","",""],
+    ["Electronics","Mac Mini","M6 12","12","24gb","512gb","170 GB/s","$1,149.00","$1,299.00","$1,199.00","$100.00","$1,149.99","","",""],
+    ["Electronics","Mac Mini","M6 12","12","24gb","1tb","170 GB/s","","$1,599.00","$1,469.00","$130.00","","","",""],
+    ["Electronics","Mac Mini","M6 12","12","32gb","512gb","170 GB/s","","$1,499.00","$1,379.00","$120.00","","","",""],
+    ["Electronics","Mac Mini","M6 12","12","32gb","1tb","170 GB/s","","$1,799.00","$1,649.00","$150.00","","","",""],
+    ["Electronics","Mac Mini","M4 Pro 12","16","24gb","512gb","273 GB/s","$1,199.00","$1,599.00","","$399.03","$1,199.97","","",""],
+    ["Electronics","Mac Mini","M4 Pro 12","16","48gb","512gb","273 GB/s","$1,799.00","$2,199.00","","$400.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","24gb","512gb","307 GB/s","$1,499.00","$1,699.00","$1,599.00","$200.00","$1,549.99","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","24gb","1tb","307 GB/s","","$1,999.00","$1,869.00","$130.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","48gb","512gb","307 GB/s","","$2,299.00","$2,139.00","$160.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 15","16","48gb","1tb","307 GB/s","","$2,599.00","$2,409.00","$190.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 18","20","24gb","512gb","307 GB/s","","$1,899.00","$1,799.00","$100.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 18","20","48gb","512gb","307 GB/s","","$2,499.00","$2,319.00","$180.00","","","",""],
+    ["Electronics","Mac Mini","M5 Pro 18","20","48gb","1tb","307 GB/s","$2,499.00","$2,799.00","$2,589.00","$300.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","32","36gb","512gb","460 GB/s","$2,199.00","$2,499.00","$2,299.00","$300.00","$2,299.00","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","32","36gb","1tb","460 GB/s","$2,399.00","$2,799.00","$2,569.00","$400.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","48gb","512gb","614 GB/s","","$3,099.00","$2,839.00","$260.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","48gb","1tb","614 GB/s","$3,199.00","$3,399.00","$3,109.00","$290.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","64gb","512gb","614 GB/s","","$3,399.00","$3,199.00","$200.00","","","",""],
+    ["Electronics","Mac Studio","M5 Max 18","40","64gb","1tb","614 GB/s","","$3,799.00","$3,460.00","$339.00","","","",""],
+    ["Electronics","Mac Studio","M5 Ultra 30","64","96gb","1tb","1200 GB/s","","$5,499.00","$5,099.00","$400.00","","","",""],
+    ["Electronics","Mac Studio","M5 Ultra 30","64","96gb","2tb","1200 GB/s","","$5,999.00","$5,499.00","$500.00","","","",""]
   ]
 };
 
@@ -680,6 +724,47 @@ const VALUE = {
 };
 const per1k = (r, k) => VALUE[k].get(r) / best(r).price * 1000;
 
+// ===== Your entries (saved in this browser) =====
+const ENTRY_KEY = "macmini-analysis-entries";
+let ENTRIES = (() => { try { return JSON.parse(localStorage.getItem(ENTRY_KEY) || "[]"); } catch { return []; } })();
+const MINE = new Set();   // "rowId|storeKey" cells and "rowId|*" rows that came from entries
+let LAST_SRC = SNAPSHOT;
+function saveEntries() { try { localStorage.setItem(ENTRY_KEY, JSON.stringify(ENTRIES)); } catch {} }
+const sheetSize = gb => gb >= 1024 ? (gb / 1024) + "tb" : gb + "gb";
+// Layer the viewer's entries onto the sheet, then build the model from the result.
+function compose(src) {
+  LAST_SRC = src;
+  const base = buildModel(src);
+  if (!base || !ENTRIES.length) { MINE.clear(); return base; }
+  const headers = src.headers.slice(), rows = src.rows.map(r => r.slice());
+  const H = () => headers.map(norm);
+  const colFor = name => {
+    let i = H().indexOf(norm(name));
+    if (i < 0) { headers.push(name); rows.forEach(r => r.push("")); i = headers.length - 1; }
+    return i;
+  };
+  const cell = v => "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const marks = [];
+  ENTRIES.forEach(e => {
+    if (e.t === "price") {
+      const r = base.byId[e.id]; if (!r) return;
+      const c = colFor(e.store); rows[r.n][c] = cell(e.price); marks.push([e.id, norm(e.store)]);
+    } else if (e.t === "config") {
+      const row = headers.map(() => "");
+      const set = (n, v) => { const i = H().indexOf(n); if (i >= 0) row[i] = v; };
+      set("product", e.product === "Mac Studio" ? "Mac Studio" : "Mac Mini"); set("cpu", `${e.chip} ${e.cpu}`); set("gpu", String(e.gpu));
+      set("ram", e.ram + "gb"); set("ssd", sheetSize(e.ssd)); set("membandwidth", e.bw + " GB/s"); set("notes", e.note || "");
+      rows.push(row);
+      Object.entries(e.prices).forEach(([store, p]) => { const c = colFor(store); row[c] = cell(p); while (row.length < headers.length) row.push(""); });
+      marks.push([[e.product, e.chip, e.cpu, e.gpu, e.ram, e.ssd].join("|"), "*"]);
+    }
+  });
+  rows.forEach(r => { while (r.length < headers.length) r.push(""); });
+  const m = buildModel({ headers, rows }) || base;
+  MINE.clear(); marks.forEach(([id, k]) => MINE.add(id + "|" + k));
+  return m;
+}
+
 // ===== Appearance (light by default, dark on request) =====
 const THEME_KEY = "macmini-analysis-theme";
 const ICON_MOON = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M16.5 12.2A7 7 0 0 1 7.8 3.5a7 7 0 1 0 8.7 8.7z"/></svg>`;
@@ -887,6 +972,184 @@ function renderBar() {
   s.textContent = b.save > 0 ? `Save ${fmt$(b.save)}` : "Apple’s full price"; s.className = "save" + (b.save > 0 ? "" : " zero");
 }
 
+// ===== Local AI step (builder) =====
+function aiStepHTML(r) {
+  const b = best(r), v = per1k(r, "score");
+  const rows = r.ai.runs.map(m => {
+    const st = m.fits ? ratingOf(m.tps) : "Won’t fit";
+    const cls = !m.fits ? "no" : st === "Smooth" ? "ok" : st === "Usable" ? "mid" : "slow";
+    return `<div class="airow ${m.fits ? "" : "off"}">
+      <div class="am"><b>${m.name}</b><small>${esc(m.eg)} · ${m.file}GB</small></div>
+      <span class="rt ${cls}">${st}</span>
+      <div class="tp num">${m.fits ? `~${Math.round(m.tps)}<small> words/s</small>` : `<small>needs ${Math.ceil((m.file + AI.ctx) / AI.share)}GB</small>`}</div></div>`;
+  }).join("");
+  return `<div class="aibox">
+    <div class="aitop">
+      <div><div class="big2 num">${r.score}</div><div class="cap">AI score</div></div>
+      <div><div class="big2 num">${v.toFixed(0)}</div><div class="cap">points per $1,000</div></div>
+      <div><div class="big2 num">~${Math.round(r.ai.readSec)}<span>s</span></div><div class="cap">to read a 20-page prompt</div></div>
+    </div>
+    ${rows}
+    <div class="aifoot">Writing speed in words (tokens) per second at 4-bit. Smooth is 20+, usable is 8 to 20. Estimates from memory, bandwidth and GPU specs, not benchmarks. <a href="#how">How it’s calculated</a></div>
+  </div>`;
+}
+
+// ===== Performance per dollar section =====
+function renderValue() {
+  const M = state.model, cur = current();
+  // Cheapest machine that runs each model size, plus the fastest one under twice that price.
+  const tiers = AI.models.map((m, i) => {
+    const can = M.rows.filter(r => r.ai.runs[i].fits).sort((a, b) => best(a).price - best(b).price);
+    if (!can.length) return `<div class="tier none"><div class="tn">${m.name}</div><div class="te">${esc(m.eg)}</div><div class="tx">Nothing on your list can run it.</div></div>`;
+    const c = can[0], p = best(c).price;
+    const fast = can.filter(r => best(r).price <= p * 2).sort((a, b) => b.ai.runs[i].tps - a.ai.runs[i].tps)[0];
+    return `<button class="tier" data-id="${esc(c.id)}">
+      <div class="tn">${m.name}</div><div class="te">${esc(m.eg)}</div>
+      <div class="tl">Cheapest way to run it</div>
+      <div class="tc">${esc(c.product)} ${esc(c.chip)}<small>${shortCfg(c)}</small></div>
+      <div class="tpx num">${fmt$(p)}</div>
+      <div class="ts">~${Math.round(c.ai.runs[i].tps)} words/s · ${ratingOf(c.ai.runs[i].tps)}</div>
+      ${fast && fast.id !== c.id ? `<div class="tf">Faster: ${esc(fast.chip)} ${shortCfg(fast)}, ~${Math.round(fast.ai.runs[i].tps)} words/s for ${fmt$(best(fast).price)}</div>` : ""}
+    </button>`;
+  }).join("");
+  document.getElementById("tiers").innerHTML = tiers;
+  document.querySelectorAll("#tiers [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
+
+  const k = state.vmetric in VALUE ? state.vmetric : "score", V = VALUE[k];
+  document.getElementById("valSeg").innerHTML = Object.entries(VALUE).map(([key, x]) =>
+    `<button data-v="${key}" aria-pressed="${key === k}">${x.label}</button>`).join("");
+  document.querySelectorAll("#valSeg button").forEach(b => b.onclick = () => { state.vmetric = b.dataset.v; persist(); renderValue(); });
+
+  const ranked = M.rows.map(r => ({ r, v: per1k(r, k) })).sort((a, b) => b.v - a.v);
+  const top = ranked[0].v;
+  document.getElementById("valChart").innerHTML = `
+    <div class="vhead"><span>${V.label} per $1,000 of best price</span><span>Higher is better</span></div>` +
+    ranked.map(({ r, v }, i) => `<button class="vrow ${r.id === cur.id ? "cur" : ""}" data-id="${esc(r.id)}">
+      <span class="vl"><b>${esc(r.product.replace("Mac ", ""))} ${esc(r.chip)}</b> ${shortCfg(r)}${i === 0 ? ` <span class="badge">Best value</span>` : ""}${r.id === cur.id ? ` <span class="badge you">Your build</span>` : ""}</span>
+      <span class="vb"><i class="${r.product === "Mac Studio" ? "st" : ""}" style="width:${(100 * v / top).toFixed(1)}%"></i></span>
+      <span class="vv num">${v.toFixed(V.dec)} <small>${V.unit}</small></span></button>`).join("");
+  document.querySelectorAll("#valChart [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
+
+  const base = M.rows.base;
+  document.getElementById("how").innerHTML = `<summary>How it’s calculated</summary>
+    <div class="howbody">
+      <p><b>Memory decides which models fit.</b> About ${AI.share * 100}% of unified memory can go to the GPU (the macOS default on most configurations; it can be raised). We keep ${AI.ctx}GB free for the conversation, then check each model’s 4-bit file size against what’s left.</p>
+      <p><b>Bandwidth decides writing speed.</b> Every word a model writes reads the whole model from memory once, so words per second ≈ ${AI.eff * 100}% of memory bandwidth ÷ model size. That lines up with published llama.cpp and MLX results on M-series Macs within about 20%. The 120B model is a mixture-of-experts that only reads about ${AI.models[4].active}GB per word, which is why it’s fast once it fits.</p>
+      <p><b>GPU power decides reading speed.</b> Reading a prompt is compute-bound: about ${AI.perCore} tokens per second per GPU core on an 8B model for M4-generation chips, times 3 for M5 and M6, whose GPU cores add neural accelerators. Apple quotes 3.5 to 4 times M4 for AI work; M6 is assumed to match M5.</p>
+      <p><b>AI score</b> is the geometric mean of those three (usable memory, bandwidth, GPU compute), with the ${esc(base.product)} ${esc(base.chip)} ${shortCfg(base)} set to 100. A geometric mean keeps one huge number from hiding a weak one. <b>Per $1,000</b> divides by the best price from the stores you’ve ticked, so it changes when you change stores or the trade-in.</p>
+    </div>`;
+}
+
+// ===== Add prices section =====
+const entryUI = { mode: "price" };
+function storeOptions(sel) {
+  const names = [...new Set(state.model.stores.map(s => s.name).concat(ENTRIES.flatMap(e => e.t === "price" ? [e.store] : Object.keys(e.prices || {}))))];
+  const label = n => (state.model.stores.find(s => s.name === n || s.key === norm(n)) || {}).name || n;
+  return [...new Set(names.map(label))].map(n => `<option ${n === sel ? "selected" : ""}>${esc(n)}</option>`).join("") + `<option value="__new">Another store…</option>`;
+}
+// Sheet header for a store, so entries line up with the sheet's own columns.
+const STORE_HEADER = { "Micro Center": "Microcenter", "Apple": "Manufacturer", "Apple Education": "Education", "Costco": "Costco", "Best Buy": "BestBuy" };
+function renderEntry() {
+  const M = state.model, el = document.getElementById("entryForm"), cur = current();
+  document.getElementById("entrySeg").innerHTML = [["price", "Price for a listed Mac"], ["config", "A new configuration"]]
+    .map(([k, l]) => `<button data-m="${k}" aria-pressed="${entryUI.mode === k}">${l}</button>`).join("");
+  document.querySelectorAll("#entrySeg button").forEach(b => b.onclick = () => { entryUI.mode = b.dataset.m; renderEntry(); });
+  const groups = [...new Map(M.rows.map(r => [r.chipKey, r])).values()];
+  const cfgOpts = groups.map(g => `<optgroup label="${esc(g.product)} · ${esc(g.chip)} ${g.cpu}/${g.gpu}">` +
+    M.rows.filter(r => r.chipKey === g.chipKey).map(r => `<option value="${esc(r.id)}" ${r.id === cur.id ? "selected" : ""}>${shortCfg(r)}</option>`).join("") + "</optgroup>").join("");
+  const storeField = `<label class="fld"><span>Store</span><select id="enStore">${storeOptions("Micro Center")}</select></label>
+    <label class="fld" id="enNewWrap" hidden><span>Store name</span><input id="enNew" type="text" placeholder="e.g. B&H Photo" autocomplete="off"></label>
+    <label class="fld"><span>Price</span><span class="money"><i>$</i><input id="enPrice" type="number" inputmode="decimal" min="1" step="0.01" placeholder="2,199"></span></label>`;
+  el.innerHTML = entryUI.mode === "price" ? `
+    <label class="fld wide"><span>Configuration</span><select id="enCfg">${cfgOpts}</select></label>${storeField}
+    <div class="fhint" id="enHint"></div>
+    <button class="btn pri" type="submit">Save price</button>` : `
+    <label class="fld"><span>Model</span><select id="enProd"><option>Mac mini</option><option>Mac Studio</option></select></label>
+    <label class="fld"><span>Chip</span><input id="enChip" type="text" placeholder="M5 Max" required autocomplete="off"></label>
+    <label class="fld"><span>CPU cores</span><input id="enCpu" type="number" min="1" step="1" placeholder="18" required></label>
+    <label class="fld"><span>GPU cores</span><input id="enGpu" type="number" min="1" step="1" placeholder="40" required></label>
+    <label class="fld"><span>Memory (GB)</span><input id="enRam" type="number" min="8" step="1" placeholder="128" required></label>
+    <label class="fld"><span>Storage</span><select id="enSsd"><option value="256">256GB</option><option value="512" selected>512GB</option><option value="1024">1TB</option><option value="2048">2TB</option><option value="4096">4TB</option><option value="8192">8TB</option></select></label>
+    <label class="fld"><span>Bandwidth (GB/s)</span><input id="enBw" type="number" min="1" step="1" placeholder="614" required></label>
+    <label class="fld"><span>Apple price</span><span class="money"><i>$</i><input id="enMsrp" type="number" inputmode="decimal" min="1" step="0.01" placeholder="Optional"></span></label>
+    ${storeField}
+    <button class="btn pri" type="submit">Add configuration</button>`;
+  const st = document.getElementById("enStore"), nw = document.getElementById("enNewWrap");
+  st.onchange = () => { nw.hidden = st.value !== "__new"; updateHint(); };
+  const cfg = document.getElementById("enCfg"); if (cfg) cfg.onchange = updateHint;
+  updateHint();
+  el.onsubmit = e => {
+    e.preventDefault();
+    const store = st.value === "__new" ? document.getElementById("enNew").value.trim() : st.value;
+    const price = parseFloat(document.getElementById("enPrice").value);
+    const msg = document.getElementById("entryMsg");
+    if (!store) { msg.textContent = "Add the store’s name, then save."; return; }
+    const header = STORE_HEADER[store] || store;
+    if (entryUI.mode === "price") {
+      if (!(price > 0)) { msg.textContent = "Enter a price above $0, then save."; return; }
+      const id = cfg.value;
+      ENTRIES = ENTRIES.filter(x => !(x.t === "price" && x.id === id && norm(x.store) === norm(header)));
+      ENTRIES.push({ t: "price", id, store: header, price, at: Date.now() });
+      msg.textContent = `Saved ${fmt$(price)} at ${store}.`;
+    } else {
+      const v = id => document.getElementById(id).value;
+      const c = { t: "config", product: v("enProd"), chip: v("enChip").trim().replace(/\s+/g, " "), cpu: +v("enCpu"), gpu: +v("enGpu"), ram: +v("enRam"), ssd: +v("enSsd"), bw: +v("enBw"), prices: {}, at: Date.now() };
+      if (!/^M\d/i.test(c.chip) || !c.cpu || !c.gpu || !c.ram || !c.bw) { msg.textContent = "Fill in the chip (like M5 Max), cores, memory and bandwidth."; return; }
+      const msrp = parseFloat(v("enMsrp"));
+      if (msrp > 0) c.prices.Manufacturer = msrp;
+      if (price > 0) c.prices[header] = price;
+      if (!Object.keys(c.prices).length) { msg.textContent = "Enter at least one price."; return; }
+      ENTRIES.push(c);
+      msg.textContent = `Added ${c.product} ${c.chip} ${fmtSize(c.ram)} · ${fmtSize(c.ssd)}.`;
+    }
+    saveEntries(); applyModel(compose(LAST_SRC), state.source);
+  };
+}
+function updateHint() {
+  const h = document.getElementById("enHint"), cfg = document.getElementById("enCfg"), st = document.getElementById("enStore");
+  if (!h || !cfg) return;
+  const r = state.model.byId[cfg.value]; if (!r) { h.textContent = ""; return; }
+  const s = state.model.stores.find(x => x.name === st.value);
+  const now = s ? r.prices[s.key] : null;
+  h.textContent = now != null ? `Currently ${fmt$(now)} at ${s.name}. Best price is ${fmt$(best(r).price)}.` : `No ${st.value === "__new" ? "" : st.value + " "}price yet. Best price is ${fmt$(best(r).price)}.`;
+}
+function entryLabel(e) {
+  if (e.t === "price") {
+    const r = state.model.byId[e.id];
+    const s = state.model.stores.find(x => x.key === norm(e.store));
+    return `<b>${fmt$(e.price)}</b> at ${esc(s ? s.name : e.store)}<small>${r ? esc(fullName(r)) + " · " + shortCfg(r) : "Configuration no longer in the sheet"}</small>`;
+  }
+  const ps = Object.entries(e.prices).map(([k, p]) => `${fmt$(p)} ${esc((state.model.stores.find(x => x.key === norm(k)) || {}).short || k)}`).join(" · ");
+  return `<b>New: ${esc(e.product)} ${esc(e.chip)} ${e.cpu}/${e.gpu}</b> ${fmtSize(e.ram)} · ${fmtSize(e.ssd)} · ${e.bw}GB/s<small>${ps}</small>`;
+}
+function renderEntries() {
+  renderEntry();
+  const el = document.getElementById("entryList");
+  if (!ENTRIES.length) {
+    el.innerHTML = `<div class="empty">Nothing added yet. Prices you save here are used everywhere on this page, in this browser only.</div>`;
+    return;
+  }
+  const day = t => new Date(t).toLocaleDateString([], { month: "short", day: "numeric" });
+  el.innerHTML = `<div class="elhead"><span>Your entries</span><span class="acts"><button class="btn" id="copyEntries">Copy for my sheet</button><button class="btn" id="clearEntries">Remove all</button></span></div>` +
+    ENTRIES.map((e, i) => `<div class="erow"><span class="el">${entryLabel(e)}</span><span class="ed">${day(e.at)}</span><button class="iconbtn" data-del="${i}" aria-label="Remove this entry"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div>`).join("") +
+    `<div class="fhint" id="copyMsg"></div>`;
+  el.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { ENTRIES.splice(+b.dataset.del, 1); saveEntries(); applyModel(compose(LAST_SRC), state.source); });
+  let armed = false;
+  document.getElementById("clearEntries").onclick = e => {
+    if (!armed) { armed = true; e.target.textContent = "Tap again to remove all"; return; }
+    ENTRIES = []; saveEntries(); applyModel(compose(LAST_SRC), state.source);
+  };
+  document.getElementById("copyEntries").onclick = async () => {
+    const text = ENTRIES.map(e => {
+      if (e.t === "price") { const r = state.model.byId[e.id]; return `${r ? fullName(r) + " " + shortCfg(r) : e.id}\t${e.store}\t${fmt$(e.price)}`; }
+      return ["Electronics", e.product === "Mac Studio" ? "Mac Studio" : "Mac Mini", `${e.chip} ${e.cpu}`, e.gpu, e.ram + "gb", sheetSize(e.ssd), e.bw + " GB/s"].join("\t") + "\t" + Object.entries(e.prices).map(([k, p]) => `${k}: ${fmt$(p)}`).join("\t");
+    }).join("\n");
+    const msg = document.getElementById("copyMsg");
+    try { await navigator.clipboard.writeText(text); msg.textContent = "Copied. Paste it next to your sheet, then move each price into its store’s column."; }
+    catch { msg.innerHTML = `Copy this text:<textarea class="copybox" readonly rows="${Math.min(6, ENTRIES.length + 1)}">${esc(text)}</textarea>`; msg.querySelector("textarea").select(); }
+  };
+}
+
 // ===== Map =====
 const METRICS = {
   bw:  { label: "Bandwidth", noun: "memory bandwidth", get: r => r.bw,  fmt: v => v + " GB/s" },
@@ -1056,13 +1319,13 @@ function renderTable() {
     }
     const b = best(r), of = offers(r);
     h += `<tr data-id="${esc(r.id)}" class="${r.id === state.cur ? "cur" : ""}">
-      <td><span class="cfg">${state.sort === "lineup" ? shortCfg(r) : `${esc(r.product)} ${esc(r.chip)} ${r.cpu}/${r.gpu}`}<small>${state.sort === "lineup" ? (r.status || r.notes ? esc([r.status, r.notes].filter(Boolean).join(" · ")) : "&nbsp;") : shortCfg(r)}</small></span></td>
+      <td><span class="cfg ${MINE.has(r.id + "|*") ? "mine" : ""}">${state.sort === "lineup" ? shortCfg(r) : `${esc(r.product)} ${esc(r.chip)} ${r.cpu}/${r.gpu}`}<small>${state.sort === "lineup" ? (r.status || r.notes ? esc([r.status, r.notes].filter(Boolean).join(" · ")) : "&nbsp;") : shortCfg(r)}</small></span></td>
       <td><span class="bp">${fmt$(b.price)}</span></td><td class="sv">${b.save > 0 ? fmt$(b.save) : "—"}</td><td>${r.score}</td><td>${per1k(r, "score").toFixed(0)}</td>
       ${cols.map(s => {
         const o = of.find(o => o.store.key === s.key);
         if (!o) return `<td class="na">—</td>`;
         const isB = !o.off && b.stores.includes(s);
-        return `<td style="${o.off ? "opacity:.4" : ""}">${isB ? `<span class="bp">${fmt$(o.price)}</span>` : fmt$(o.price)}${o.credit ? "*" : ""}</td>`;
+        return `<td class="${MINE.has(r.id + "|" + s.key) ? "mine" : ""}" style="${o.off ? "opacity:.4" : ""}">${isB ? `<span class="bp">${fmt$(o.price)}</span>` : fmt$(o.price)}${o.credit ? "*" : ""}</td>`;
       }).join("")}
       <td>${r.bw} GB/s</td></tr>`;
   });
@@ -1070,7 +1333,7 @@ function renderTable() {
   document.querySelectorAll("#tbl tbody tr[data-id]").forEach(tr => tr.onclick = () => { setCur(tr.dataset.id); document.getElementById("build").scrollIntoView(); });
   const empty = M.stores.filter(s => !cols.includes(s)).map(s => s.name);
   document.getElementById("tfoot").innerHTML = [
-    "Tap a row to load it into the builder.",
+    "Tap a row to load it into the builder.", MINE.size ? "Blue dots mark prices you added on this page." : "",
     "“You save” is Apple’s price minus the best price from the stores you’ve ticked. The sheet’s own Diff column compares against a different store on different rows, so a few of its numbers won’t match.",
     state.trade && M.tradeAmt ? `* Includes your ${fmt$(M.tradeAmt)} trade-in, applied at Apple and Apple Education.` : "",
     empty.length ? `${list(empty)} ${empty.length > 1 ? "have" : "has"} no prices in the sheet yet.` : ""
@@ -1099,10 +1362,10 @@ function payloadText(res) {
   if (p && typeof p.fileContent === "string") return p.fileContent;
   const t = (res?.content || []).find(c => c.type === "text"); return t ? t.text : "";
 }
-function useSnapshot() { if (state.source !== "snapshot") applyModel(buildModel(SNAPSHOT), "snapshot"); }
+function useSnapshot() { if (state.source !== "snapshot") applyModel(compose(SNAPSHOT), "snapshot"); }
 function onSyncEvent(ev) {
   if (ev.type === "data") {
-    const parsed = parseSheetText(payloadText(ev.result)), model = parsed && buildModel(parsed);
+    const parsed = parseSheetText(payloadText(ev.result)), model = parsed && compose(parsed);
     if (!model) { useSnapshot(); setSync("warn", `Your sheet's columns didn't match what this page expects, so it's showing the ${SNAPSHOT_DATE} snapshot.`); return; }
     sync.at = ev.result.cache?.storedAt || Date.now();
     applyModel(model, "live"); setSync("live"); return;
@@ -1143,7 +1406,7 @@ function applyModel(model, source) {
   renderAll();
 }
 function renderAll() {
-  renderPrefs(); renderStage(); renderSteps(); renderBar(); renderMetricSeg(); renderMap(); renderValue(); renderCompare(); renderSortSeg(); renderTable();
+  renderPrefs(); renderStage(); renderSteps(); renderBar(); renderMetricSeg(); renderMap(); renderValue(); renderCompare(); renderSortSeg(); renderTable(); renderEntries();
   document.getElementById("foot").innerHTML = `Prices from your Google Sheet <a href="${SHEET_URL}" target="_blank" rel="noopener" style="color:inherit">MacMiniAnalysis</a>, WORKING SHEET tab. ${state.source === "live" ? "Synced live." : `Snapshot taken ${SNAPSHOT_DATE}.`}`;
 }
 function initNav() {
@@ -1152,81 +1415,13 @@ function initNav() {
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
   }), { rootMargin: "-45% 0px -50% 0px" });
-  ["build", "map", "value", "compare", "prices"].forEach(id => io.observe(document.getElementById(id)));
+  ["build", "map", "value", "compare", "prices", "add"].forEach(id => io.observe(document.getElementById(id)));
 }
-applyModel(buildModel(SNAPSHOT), "snapshot");
+applyModel(compose(SNAPSHOT), "snapshot");
 initNav();
 let lastW = 0;
 if ("ResizeObserver" in window) new ResizeObserver(es => { const w = Math.round(es[0].contentRect.width); if (w && w !== lastW) { lastW = w; renderMap(); } }).observe(document.getElementById("mapHost"));
 initSync();
-
-// ===== Local AI step (builder) =====
-function aiStepHTML(r) {
-  const b = best(r), v = per1k(r, "score");
-  const rows = r.ai.runs.map(m => {
-    const st = m.fits ? ratingOf(m.tps) : "Won’t fit";
-    const cls = !m.fits ? "no" : st === "Smooth" ? "ok" : st === "Usable" ? "mid" : "slow";
-    return `<div class="airow ${m.fits ? "" : "off"}">
-      <div class="am"><b>${m.name}</b><small>${esc(m.eg)} · ${m.file}GB</small></div>
-      <span class="rt ${cls}">${st}</span>
-      <div class="tp num">${m.fits ? `~${Math.round(m.tps)}<small> words/s</small>` : `<small>needs ${Math.ceil((m.file + AI.ctx) / AI.share)}GB</small>`}</div></div>`;
-  }).join("");
-  return `<div class="aibox">
-    <div class="aitop">
-      <div><div class="big2 num">${r.score}</div><div class="cap">AI score</div></div>
-      <div><div class="big2 num">${v.toFixed(0)}</div><div class="cap">points per $1,000</div></div>
-      <div><div class="big2 num">~${Math.round(r.ai.readSec)}<span>s</span></div><div class="cap">to read a 20-page prompt</div></div>
-    </div>
-    ${rows}
-    <div class="aifoot">Writing speed in words (tokens) per second at 4-bit. Smooth is 20+, usable is 8 to 20. Estimates from memory, bandwidth and GPU specs, not benchmarks. <a href="#how">How it’s calculated</a></div>
-  </div>`;
-}
-
-// ===== Performance per dollar section =====
-function renderValue() {
-  const M = state.model, cur = current();
-  // Cheapest machine that runs each model size, plus the fastest one under twice that price.
-  const tiers = AI.models.map((m, i) => {
-    const can = M.rows.filter(r => r.ai.runs[i].fits).sort((a, b) => best(a).price - best(b).price);
-    if (!can.length) return `<div class="tier none"><div class="tn">${m.name}</div><div class="te">${esc(m.eg)}</div><div class="tx">Nothing on your list can run it.</div></div>`;
-    const c = can[0], p = best(c).price;
-    const fast = can.filter(r => best(r).price <= p * 2).sort((a, b) => b.ai.runs[i].tps - a.ai.runs[i].tps)[0];
-    return `<button class="tier" data-id="${esc(c.id)}">
-      <div class="tn">${m.name}</div><div class="te">${esc(m.eg)}</div>
-      <div class="tl">Cheapest way to run it</div>
-      <div class="tc">${esc(c.product)} ${esc(c.chip)}<small>${shortCfg(c)}</small></div>
-      <div class="tpx num">${fmt$(p)}</div>
-      <div class="ts">~${Math.round(c.ai.runs[i].tps)} words/s · ${ratingOf(c.ai.runs[i].tps)}</div>
-      ${fast && fast.id !== c.id ? `<div class="tf">Faster: ${esc(fast.chip)} ${shortCfg(fast)}, ~${Math.round(fast.ai.runs[i].tps)} words/s for ${fmt$(best(fast).price)}</div>` : ""}
-    </button>`;
-  }).join("");
-  document.getElementById("tiers").innerHTML = tiers;
-  document.querySelectorAll("#tiers [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
-
-  const k = state.vmetric in VALUE ? state.vmetric : "score", V = VALUE[k];
-  document.getElementById("valSeg").innerHTML = Object.entries(VALUE).map(([key, x]) =>
-    `<button data-v="${key}" aria-pressed="${key === k}">${x.label}</button>`).join("");
-  document.querySelectorAll("#valSeg button").forEach(b => b.onclick = () => { state.vmetric = b.dataset.v; persist(); renderValue(); });
-
-  const ranked = M.rows.map(r => ({ r, v: per1k(r, k) })).sort((a, b) => b.v - a.v);
-  const top = ranked[0].v;
-  document.getElementById("valChart").innerHTML = `
-    <div class="vhead"><span>${V.label} per $1,000 of best price</span><span>Higher is better</span></div>` +
-    ranked.map(({ r, v }, i) => `<button class="vrow ${r.id === cur.id ? "cur" : ""}" data-id="${esc(r.id)}">
-      <span class="vl"><b>${esc(r.product.replace("Mac ", ""))} ${esc(r.chip)}</b> ${shortCfg(r)}${i === 0 ? ` <span class="badge">Best value</span>` : ""}${r.id === cur.id ? ` <span class="badge you">Your build</span>` : ""}</span>
-      <span class="vb"><i class="${r.product === "Mac Studio" ? "st" : ""}" style="width:${(100 * v / top).toFixed(1)}%"></i></span>
-      <span class="vv num">${v.toFixed(V.dec)} <small>${V.unit}</small></span></button>`).join("");
-  document.querySelectorAll("#valChart [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
-
-  const base = M.rows.base;
-  document.getElementById("how").innerHTML = `<summary>How it’s calculated</summary>
-    <div class="howbody">
-      <p><b>Memory decides which models fit.</b> About ${AI.share * 100}% of unified memory can go to the GPU (the macOS default on most configurations; it can be raised). We keep ${AI.ctx}GB free for the conversation, then check each model’s 4-bit file size against what’s left.</p>
-      <p><b>Bandwidth decides writing speed.</b> Every word a model writes reads the whole model from memory once, so words per second ≈ ${AI.eff * 100}% of memory bandwidth ÷ model size. That lines up with published llama.cpp and MLX results on M-series Macs within about 20%. The 120B model is a mixture-of-experts that only reads about ${AI.models[4].active}GB per word, which is why it’s fast once it fits.</p>
-      <p><b>GPU power decides reading speed.</b> Reading a prompt is compute-bound: about ${AI.perCore} tokens per second per GPU core on an 8B model for M4-generation chips, times 3 for M5 and M6, whose GPU cores add neural accelerators. Apple quotes 3.5 to 4 times M4 for AI work; M6 is assumed to match M5.</p>
-      <p><b>AI score</b> is the geometric mean of those three (usable memory, bandwidth, GPU compute), with the ${esc(base.product)} ${esc(base.chip)} ${shortCfg(base)} set to 100. A geometric mean keeps one huge number from hiding a weak one. <b>Per $1,000</b> divides by the best price from the stores you’ve ticked, so it changes when you change stores or the trade-in.</p>
-    </div>`;
-}
 </script>
 </body>
 </html>
