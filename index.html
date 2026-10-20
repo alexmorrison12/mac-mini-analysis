@@ -348,6 +348,14 @@ section.ruled{border-top:1px solid var(--hair-2)}
 .empty{font-size:14px;color:var(--muted);padding:6px 0}
 .copybox{display:block;width:100%;margin-top:8px;font:12px ui-monospace,Menlo,monospace;padding:10px;border-radius:10px;border:1px solid var(--hair);background:var(--tile);color:var(--ink)}
 td.mine::after,.cfg.mine::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-left:6px;vertical-align:2px}
+
+.sure{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding-top:10px;font-size:12px}
+.sure .sk{color:var(--muted);font-weight:600;margin-right:2px}
+.sure .cf{padding:2px 9px;border-radius:999px;font-weight:500}
+.sure .cf.hi{background:var(--green-soft);color:var(--green)}
+.sure .cf.md{background:var(--blue-soft);color:var(--blue)}
+.sure .cf.lo{background:var(--orange-soft);color:var(--orange)}
+.sure a{margin-left:auto}
 </style>
 
 </head>
@@ -685,7 +693,7 @@ function defaultRival(r) {
 const AI = {
   share: 0.75,          // part of unified memory the GPU can use (macOS default on most configs)
   ctx: 2,               // GB kept free for the conversation's context
-  eff: 0.65,            // share of memory bandwidth real inference gets
+  eff: 0.8,             // share of memory bandwidth real inference gets (low end of reported M5 results)
   perCore: 22,          // prompt tokens/s per M4-class GPU core on an 8B model
   prompt: 10000,        // tokens in the sample prompt (about 20 pages)
   models: [
@@ -717,12 +725,14 @@ function enrichAI(rows, stores) {
 }
 // Per-dollar figures depend on the viewer's store choices, so they are worked out on demand.
 const VALUE = {
-  score: { label: "AI value",  unit: "pts",  get: r => r.score,        dec: 0 },
-  ram:   { label: "Memory",    unit: "GB",   get: r => r.ram,          dec: 1 },
-  bw:    { label: "Bandwidth", unit: "GB/s", get: r => r.bw,           dec: 0 },
-  ssd:   { label: "Storage",   unit: "TB",   get: r => r.ssd / 1024,   dec: 2 }
+  score: { label: "AI score",  per: "AI point",       get: r => r.score },
+  ram:   { label: "Memory",    per: "GB of memory",   get: r => r.ram },
+  bw:    { label: "Bandwidth", per: "GB/s of bandwidth", get: r => r.bw },
+  ssd:   { label: "Storage",   per: "TB of storage",  get: r => r.ssd / 1024 }
 };
-const per1k = (r, k) => VALUE[k].get(r) / best(r).price * 1000;
+// What you pay for one unit, like price per ounce at the store. Lower is better.
+const costPer = (r, k) => best(r).price / VALUE[k].get(r);
+const fmtCost = v => v >= 100 ? fmt$(Math.round(v)) : "$" + v.toFixed(2);
 
 // ===== Your entries (saved in this browser) =====
 const ENTRY_KEY = "macmini-analysis-entries";
@@ -974,7 +984,7 @@ function renderBar() {
 
 // ===== Local AI step (builder) =====
 function aiStepHTML(r) {
-  const b = best(r), v = per1k(r, "score");
+  const b = best(r), v = costPer(r, "score");
   const rows = r.ai.runs.map(m => {
     const st = m.fits ? ratingOf(m.tps) : "Won’t fit";
     const cls = !m.fits ? "no" : st === "Smooth" ? "ok" : st === "Usable" ? "mid" : "slow";
@@ -986,11 +996,14 @@ function aiStepHTML(r) {
   return `<div class="aibox">
     <div class="aitop">
       <div><div class="big2 num">${r.score}</div><div class="cap">AI score</div></div>
-      <div><div class="big2 num">${v.toFixed(0)}</div><div class="cap">AI value: points per $1,000</div></div>
+      <div><div class="big2 num">${fmtCost(v)}</div><div class="cap">cost per AI point (lower is better)</div></div>
       <div><div class="big2 num">~${Math.round(r.ai.readSec)}<span>s</span></div><div class="cap">to read a 20-page prompt</div></div>
     </div>
     ${rows}
-    <div class="aifoot">Writing speed in words (tokens) per second at 4-bit. Smooth is 20+, usable is 8 to 20. Estimates from memory, bandwidth and GPU specs, not benchmarks. <a href="#how">How it’s calculated</a></div>
+    <div class="aifoot">Writing speed in words (tokens) per second at 4-bit. Smooth is 20+, usable is 8 to 20. Estimates from specs, not benchmarks.</div>
+    <div class="sure"><span class="sk">How sure</span>
+      <span class="cf hi">Fits or won’t fit: high</span><span class="cf md">Writing speed: ±20%</span><span class="cf lo">${/^M[1-4]\b/i.test(r.chip) ? "Reading speed: ±25%" : /^M6/i.test(r.chip) ? "M6 speeds: rough guess" : "Reading speed: early reports"}</span>
+      <a href="#how">How it’s calculated</a></div>
   </div>`;
 }
 
@@ -1020,23 +1033,24 @@ function renderValue() {
     `<button data-v="${key}" aria-pressed="${key === k}">${x.label}</button>`).join("");
   document.querySelectorAll("#valSeg button").forEach(b => b.onclick = () => { state.vmetric = b.dataset.v; persist(); renderValue(); });
 
-  const ranked = M.rows.map(r => ({ r, v: per1k(r, k) })).sort((a, b) => b.v - a.v);
-  const top = ranked[0].v;
+  const ranked = M.rows.map(r => ({ r, v: costPer(r, k) })).sort((a, b) => a.v - b.v);
+  const top = ranked[ranked.length - 1].v;
   document.getElementById("valChart").innerHTML = `
-    <div class="vhead"><span>${k === "score" ? "AI score points" : V.label} you get for every $1,000 of best price</span><span>Higher is better</span></div>` +
+    <div class="vhead"><span>What you pay for each ${V.per}, at the best price</span><span>Lower is better</span></div>` +
     ranked.map(({ r, v }, i) => `<button class="vrow ${r.id === cur.id ? "cur" : ""}" data-id="${esc(r.id)}">
       <span class="vl"><b>${esc(r.product.replace("Mac ", ""))} ${esc(r.chip)}</b> ${shortCfg(r)}${k === "score" ? ` · score ${r.score} at ${fmt$(best(r).price)}` : ""}${i === 0 ? ` <span class="badge">Best value</span>` : ""}${r.id === cur.id ? ` <span class="badge you">Your build</span>` : ""}</span>
       <span class="vb"><i class="${r.product === "Mac Studio" ? "st" : ""}" style="width:${(100 * v / top).toFixed(1)}%"></i></span>
-      <span class="vv num">${v.toFixed(V.dec)} <small>${V.unit} per $1k</small></span></button>`).join("");
+      <span class="vv num">${fmtCost(v)} <small>per ${V.per.split(" ")[0] === "AI" ? "point" : V.per.split(" ")[0]}</small></span></button>`).join("");
   document.querySelectorAll("#valChart [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
 
   const base = M.rows.base;
   document.getElementById("how").innerHTML = `<summary>How it’s calculated</summary>
     <div class="howbody">
       <p><b>Memory decides which models fit.</b> About ${AI.share * 100}% of unified memory can go to the GPU (the macOS default on most configurations; it can be raised). We keep ${AI.ctx}GB free for the conversation, then check each model’s 4-bit file size against what’s left.</p>
-      <p><b>Bandwidth decides writing speed.</b> Every word a model writes reads the whole model from memory once, so words per second ≈ ${AI.eff * 100}% of memory bandwidth ÷ model size. That lines up with published llama.cpp and MLX results on M-series Macs within about 20%. The 120B model is a mixture-of-experts that only reads about ${AI.models[4].active}GB per word, which is why it’s fast once it fits.</p>
-      <p><b>GPU power decides reading speed.</b> Reading a prompt is compute-bound: about ${AI.perCore} tokens per second per GPU core on an 8B model for M4-generation chips, times 3 for M5 and M6, whose GPU cores add neural accelerators. Apple quotes 3.5 to 4 times M4 for AI work; M6 is assumed to match M5.</p>
-      <p><b>AI score</b> is the geometric mean of those three (usable memory, bandwidth, GPU compute), with the ${esc(base.product)} ${esc(base.chip)} ${shortCfg(base)} set to 100. A geometric mean keeps one huge number from hiding a weak one. <b>Per $1,000</b> divides by the best price from the stores you’ve ticked, so it changes when you change stores or the trade-in.</p>
+      <p><b>Bandwidth decides writing speed.</b> Every word a model writes reads the whole model from memory once, so words per second ≈ ${AI.eff * 100}% of memory bandwidth ÷ model size. Early reports for M5 Pro (50–60 words/s on an 8B model) and M5 Max (100–120) put this at the low end, so it should hold within about 20%. MLX apps often run faster than llama.cpp apps like Ollama. The 120B model is a mixture-of-experts that only reads about ${AI.models[4].active}GB per word, which is why it’s fast once it fits.</p>
+      <p><b>GPU power decides reading speed.</b> Reading a prompt is compute-bound: about ${AI.perCore} tokens per second per GPU core on an 8B model for M4-generation chips, times 3 for M5 and M6, whose GPU cores add neural accelerators. Apple quotes 3.5 to 4 times M4, and one early report measured about 3.6 times (M5 Max 3,200 vs M4 Max 886 tokens/s). M6 is assumed to match M5; there are no M6 results yet.</p>
+      <p><b>AI score</b> is the geometric mean of those three (usable memory, bandwidth, GPU compute), with the ${esc(base.product)} ${esc(base.chip)} ${shortCfg(base)} set to 100. A geometric mean keeps one huge number from hiding a weak one. <b>Cost per point</b> is the best price divided by the score, like price per ounce at the grocery store: lower means more AI capability for each dollar. It uses the stores you’ve ticked, so it changes when you change stores or the trade-in.</p>
+      <p><b>How sure is this?</b> Which models fit is reliable: it’s simple memory math. Writing speeds are good ballpark figures, within about 20%, and real apps differ by 20–30% on the same Mac. Reading speeds for M5 rest on Apple’s claims plus early reports, and M6 is a guess. The single AI score weighs memory, bandwidth and GPU equally; if you only care about the biggest model, look at the memory column instead. Bandwidth figures come from your sheet.</p>
     </div>`;
 }
 
@@ -1311,7 +1325,7 @@ function renderTable() {
   let rows = M.rows.slice();
   if (state.sort === "price") rows.sort((a, b) => best(a).price - best(b).price);
   if (state.sort === "save") rows.sort((a, b) => best(b).save - best(a).save || best(a).price - best(b).price);
-  let h = `<thead><tr><th>Configuration</th><th>Best</th><th>You save</th><th>AI score</th><th>Per $1k</th>${cols.map(s => `<th>${esc(s.short)}</th>`).join("")}<th>Bandwidth</th></tr></thead><tbody>`;
+  let h = `<thead><tr><th>Configuration</th><th>Best</th><th>You save</th><th>AI score</th><th>$ / point</th>${cols.map(s => `<th>${esc(s.short)}</th>`).join("")}<th>Bandwidth</th></tr></thead><tbody>`;
   let lastChip = null;
   rows.forEach(r => {
     if (state.sort === "lineup" && r.chipKey !== lastChip) {
@@ -1320,7 +1334,7 @@ function renderTable() {
     const b = best(r), of = offers(r);
     h += `<tr data-id="${esc(r.id)}" class="${r.id === state.cur ? "cur" : ""}">
       <td><span class="cfg ${MINE.has(r.id + "|*") ? "mine" : ""}">${state.sort === "lineup" ? shortCfg(r) : `${esc(r.product)} ${esc(r.chip)} ${r.cpu}/${r.gpu}`}<small>${state.sort === "lineup" ? (r.status || r.notes ? esc([r.status, r.notes].filter(Boolean).join(" · ")) : "&nbsp;") : shortCfg(r)}</small></span></td>
-      <td><span class="bp">${fmt$(b.price)}</span></td><td class="sv">${b.save > 0 ? fmt$(b.save) : "—"}</td><td>${r.score}</td><td>${per1k(r, "score").toFixed(0)}</td>
+      <td><span class="bp">${fmt$(b.price)}</span></td><td class="sv">${b.save > 0 ? fmt$(b.save) : "—"}</td><td>${r.score}</td><td>${fmtCost(costPer(r, "score"))}</td>
       ${cols.map(s => {
         const o = of.find(o => o.store.key === s.key);
         if (!o) return `<td class="na">—</td>`;
