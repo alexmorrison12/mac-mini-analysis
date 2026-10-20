@@ -305,7 +305,7 @@ section.ruled{border-top:1px solid var(--hair-2)}
 .tier.none .tx{font-size:13px;color:var(--muted);margin-top:14px}
 .vtile{background:var(--bg-alt)}
 .vhead{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:18px 0 6px}
-.vrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 92px;gap:14px;align-items:center;width:100%;border:0;background:none;padding:7px 8px;margin-inline:-8px;width:calc(100% + 16px);border-radius:8px;text-align:left}
+.vrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 128px;gap:14px;align-items:center;width:100%;border:0;background:none;padding:7px 8px;margin-inline:-8px;width:calc(100% + 16px);border-radius:8px;text-align:left}
 .vrow:hover{background:var(--tile)}
 .vrow.cur{background:var(--blue-soft)}
 .vrow .vl{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -717,7 +717,7 @@ function enrichAI(rows, stores) {
 }
 // Per-dollar figures depend on the viewer's store choices, so they are worked out on demand.
 const VALUE = {
-  score: { label: "AI score",  unit: "pts",  get: r => r.score,        dec: 0 },
+  score: { label: "AI value",  unit: "pts",  get: r => r.score,        dec: 0 },
   ram:   { label: "Memory",    unit: "GB",   get: r => r.ram,          dec: 1 },
   bw:    { label: "Bandwidth", unit: "GB/s", get: r => r.bw,           dec: 0 },
   ssd:   { label: "Storage",   unit: "TB",   get: r => r.ssd / 1024,   dec: 2 }
@@ -986,7 +986,7 @@ function aiStepHTML(r) {
   return `<div class="aibox">
     <div class="aitop">
       <div><div class="big2 num">${r.score}</div><div class="cap">AI score</div></div>
-      <div><div class="big2 num">${v.toFixed(0)}</div><div class="cap">points per $1,000</div></div>
+      <div><div class="big2 num">${v.toFixed(0)}</div><div class="cap">AI value: points per $1,000</div></div>
       <div><div class="big2 num">~${Math.round(r.ai.readSec)}<span>s</span></div><div class="cap">to read a 20-page prompt</div></div>
     </div>
     ${rows}
@@ -1023,11 +1023,11 @@ function renderValue() {
   const ranked = M.rows.map(r => ({ r, v: per1k(r, k) })).sort((a, b) => b.v - a.v);
   const top = ranked[0].v;
   document.getElementById("valChart").innerHTML = `
-    <div class="vhead"><span>${V.label} per $1,000 of best price</span><span>Higher is better</span></div>` +
+    <div class="vhead"><span>${k === "score" ? "AI score points" : V.label} you get for every $1,000 of best price</span><span>Higher is better</span></div>` +
     ranked.map(({ r, v }, i) => `<button class="vrow ${r.id === cur.id ? "cur" : ""}" data-id="${esc(r.id)}">
-      <span class="vl"><b>${esc(r.product.replace("Mac ", ""))} ${esc(r.chip)}</b> ${shortCfg(r)}${i === 0 ? ` <span class="badge">Best value</span>` : ""}${r.id === cur.id ? ` <span class="badge you">Your build</span>` : ""}</span>
+      <span class="vl"><b>${esc(r.product.replace("Mac ", ""))} ${esc(r.chip)}</b> ${shortCfg(r)}${k === "score" ? ` · score ${r.score} at ${fmt$(best(r).price)}` : ""}${i === 0 ? ` <span class="badge">Best value</span>` : ""}${r.id === cur.id ? ` <span class="badge you">Your build</span>` : ""}</span>
       <span class="vb"><i class="${r.product === "Mac Studio" ? "st" : ""}" style="width:${(100 * v / top).toFixed(1)}%"></i></span>
-      <span class="vv num">${v.toFixed(V.dec)} <small>${V.unit}</small></span></button>`).join("");
+      <span class="vv num">${v.toFixed(V.dec)} <small>${V.unit} per $1k</small></span></button>`).join("");
   document.querySelectorAll("#valChart [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
 
   const base = M.rows.base;
