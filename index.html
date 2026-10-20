@@ -385,6 +385,23 @@ td.mine::after,.cfg.mine::after{content:"";display:inline-block;width:6px;height
 .srow .sw{color:var(--orange)}
 td.lad{color:var(--green)} td.skp{color:var(--orange)}
 @media (max-width:700px){.lrow{grid-template-columns:1fr 1fr;row-gap:8px}.lrow .ln{grid-column:1/-1}}
+
+.qhead,.qrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.1fr);gap:10px;align-items:center}
+.qhead{font-size:12px;font-weight:600;color:var(--muted);padding:6px 0;border-top:1px solid var(--hair-2)}
+.qhead small{font-weight:400}
+.qrow{padding:9px 0;border-top:1px solid var(--hair-2)}
+.qrow .am b{font-size:15px;font-weight:600}
+.qrow .am small{display:block;font-size:12px;color:var(--muted)}
+.qrow.off .am b{color:var(--faint)}
+.qc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:14px;font-weight:600}
+.qc small{font-weight:400;font-size:12px;color:var(--muted)}
+.qc.na small{color:var(--faint)}
+
+.lvl{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);background:var(--hair-2);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:2px}
+.smart{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:14px;padding:10px 0;border-top:1px solid var(--hair-2)}
+.smart .sk{flex-basis:100%;font-size:12px;font-weight:600;color:var(--muted)}
+.smart .room{flex-basis:100%;font-size:13px;color:var(--ink-2)}
+.vq{display:block;font-size:.7em;font-weight:500;color:var(--muted);margin-top:10px;line-height:1.4}
 </style>
 
 </head>
@@ -447,7 +464,7 @@ td.lad{color:var(--green)} td.skp{color:var(--orange)}
       <div class="shead">
         <div>
           <h2>Performance per dollar. <span>Which upgrades are worth paying for.</span></h2>
-          <p>Each machine is measured by how many of five common AI models it runs well. Bigger machines run more and cost more, so instead of one “best value” you get a ladder: every step up runs more models, priced by what each extra model costs you.</p>
+          <p>Each machine is measured by how many of 11 common AI models (six sizes, at 4-bit and 8-bit) it runs well. Bigger machines run more and cost more, so instead of one “best value” you get a ladder: every step up runs more models, priced by what each extra model costs you.</p>
         </div>
       </div>
       <div class="tiers" id="tiers"></div>
@@ -718,6 +735,16 @@ function defaultRival(r) {
 }
 
 // ===== Local AI estimates =====
+// Conversation memory per token (layers × KV heads × head size × 2 × 2 bytes) and a general quality level by size.
+const AI_META = {
+  8:   { kv: 131, level: "Basic" },
+  14:  { kv: 196, level: "Good" },
+  24:  { kv: 164, level: "Strong" },
+  32:  { kv: 262, level: "Strong" },
+  70:  { kv: 328, level: "Very strong" },
+  120: { kv: 74,  level: "Top" }
+};
+const MAX_CTX = 128000, TOK_PER_PAGE = 500;
 // Estimates, not benchmarks. Every constant is listed on the page under "How it's calculated".
 const AI = {
   share: 0.75,          // part of unified memory the GPU can use (macOS default on most configs)
@@ -727,13 +754,20 @@ const AI = {
   prompt: 10000,        // tokens in the sample prompt (about 20 pages)
   goodWrite: 20,        // words/s that feels smooth: full credit at or above this
   goodRead: 30,         // seconds to read the sample prompt: full credit at or below this
+  // Every size at 4-bit and 8-bit (GGUF Q4_K_M and Q8_0 file sizes). gpt-oss-120b ships only at about 4-bit.
   models: [
-    { b: 8,   name: "8B",   eg: "Llama 3.1 8B",       file: 4.9,  active: 4.9 },
-    { b: 14,  name: "14B",  eg: "Qwen 2.5 14B",       file: 9.0,  active: 9.0 },
-    { b: 32,  name: "32B",  eg: "Qwen 2.5 32B",       file: 19.9, active: 19.9 },
-    { b: 70,  name: "70B",  eg: "Llama 3.3 70B",      file: 42.5, active: 42.5 },
-    { b: 120, name: "120B", eg: "gpt-oss-120b (MoE)", file: 63,   active: 3.5 }
-  ]
+    { b: 8,   q: 4, eg: "Llama 3.1 8B",       file: 4.9,  active: 4.9 },
+    { b: 8,   q: 8, eg: "Llama 3.1 8B",       file: 8.5,  active: 8.5 },
+    { b: 14,  q: 4, eg: "Qwen 2.5 14B",       file: 9.0,  active: 9.0 },
+    { b: 14,  q: 8, eg: "Qwen 2.5 14B",       file: 15.7, active: 15.7 },
+    { b: 24,  q: 4, eg: "Mistral Small 24B",  file: 14.3, active: 14.3 },
+    { b: 24,  q: 8, eg: "Mistral Small 24B",  file: 25.1, active: 25.1 },
+    { b: 32,  q: 4, eg: "Qwen 2.5 32B",       file: 19.9, active: 19.9 },
+    { b: 32,  q: 8, eg: "Qwen 2.5 32B",       file: 34.8, active: 34.8 },
+    { b: 70,  q: 4, eg: "Llama 3.3 70B",      file: 42.5, active: 42.5 },
+    { b: 70,  q: 8, eg: "Llama 3.3 70B",      file: 75.0, active: 75.0 },
+    { b: 120, q: 4, eg: "gpt-oss-120b (MoE)", file: 63,   active: 3.5 }
+  ].map(m => ({ ...m, name: m.b + "B", ...AI_META[m.b] }))
 };
 // GPU cores on M5 and later include neural accelerators; Apple quotes about 3.5-4x M4 for AI work. We use 3x.
 const genOf = chip => /^M[1-4]\b/i.test(chip) ? 1 : 3;
@@ -742,12 +776,14 @@ function enrichAI(rows, stores) {
   rows.forEach(r => {
     const usable = r.ram * AI.share;
     const runs = AI.models.map(m => ({ ...m, fits: usable >= m.file + AI.ctx, tps: AI.eff * r.bw / m.active }));
-    const top = runs.filter(m => m.fits).pop() || null;
+    const top = runs.filter(m => m.fits).sort((a, b) => a.b - b.b || a.q - b.q).pop() || null;
     const prefill = AI.perCore * r.gpu * genOf(r.chip);
     // Model coverage: each model that fits earns up to 1, scaled down if it writes or reads slower than "good".
     runs.forEach(m => {
       const readSec = AI.prompt / (prefill * 4.9 / m.active);
       m.readSec = readSec;
+      m.ctx = m.fits ? Math.min(MAX_CTX, Math.max(0, (usable - m.file - 0.5) * 1e6 / m.kv)) : 0;
+      m.pages = Math.round(m.ctx / TOK_PER_PAGE);
       m.credit = m.fits ? Math.min(1, m.tps / AI.goodWrite) * Math.min(1, AI.goodRead / readSec) : 0;
     });
     r.cov = Math.round(runs.reduce((s, m) => s + m.credit, 0) * 100) / 100;
@@ -1043,33 +1079,47 @@ function ladder() {
   on.forEach(r => { const s = info[r.id].step; if (s && s.per === bestPer) s.best = true; });
   return { info, on };
 }
-const covBar = c => `<span class="cov" aria-label="${c.toFixed(1)} of 5">${[0, 1, 2, 3, 4].map(i => `<i><b style="width:${Math.max(0, Math.min(1, c - i)) * 100}%"></b></i>`).join("")}</span>`;
+const NM = AI.models.length;
+const covBar = c => `<span class="cov" style="grid-template-columns:repeat(${NM},1fr)" aria-label="${c.toFixed(1)} of ${NM}">${[...Array(NM).keys()].map(i => `<i><b style="width:${Math.max(0, Math.min(1, c - i)) * 100}%"></b></i>`).join("")}</span>`;
+
+// Say plainly why the cheaper machine wins: more models, the same models faster, or fewer models but much faster.
+function skipWhy(o, r) {
+  const fo = o.ai.runs.filter(m => m.fits).length, fr = r.ai.runs.filter(m => m.fits).length;
+  if (fo > fr) return `fits ${fo - fr} more model${fo - fr > 1 ? "s" : ""}`;
+  if (fo === fr) return o.cov > r.cov + 0.005 ? "runs the same models faster" : "runs the same models just as well";
+  const lost = r.ai.runs.filter(m => m.fits && !o.ai.runs.find(x => x.b === m.b && x.q === m.q).fits).map(m => m.name + " " + m.q + "-bit");
+  return `fits ${fr - fo} fewer (${list(lost)}) but runs the rest much faster`;
+}
 
 // ===== Local AI step (builder) =====
 function aiStepHTML(r) {
   const L = ladder().info[r.id];
-  const rows = r.ai.runs.map(m => {
+  const cellOf = m => {
+    if (!m) return `<div class="qc na"><small>Not made</small></div>`;
     const st = m.fits ? ratingOf(m.tps) : "Won’t fit";
     const cls = !m.fits ? "no" : st === "Smooth" ? "ok" : st === "Usable" ? "mid" : "slow";
-    return `<div class="airow ${m.fits ? "" : "off"}">
-      <div class="am"><b>${m.name}</b><small>${esc(m.eg)} · ${m.file}GB</small></div>
-      <span class="rt ${cls}">${st}</span>
-      <div class="tp num">${m.fits ? `~${Math.round(m.tps)}<small> words/s</small>` : `<small>needs ${Math.ceil((m.file + AI.ctx) / AI.share)}GB</small>`}</div></div>`;
+    return `<div class="qc"><span class="rt ${cls}">${st}</span><span class="num">${m.fits ? `~${Math.round(m.tps)} <small>words/s</small>` : `<small>needs ${Math.ceil((m.file + AI.ctx) / AI.share)}GB</small>`}</span></div>`;
+  };
+  const sizes = [...new Set(AI.models.map(m => m.b))];
+  const rows = `<div class="qhead"><span>Model</span><span>4-bit</span><span>8-bit <small>higher quality</small></span></div>` + sizes.map(b => {
+    const q4 = r.ai.runs.find(m => m.b === b && m.q === 4), q8 = r.ai.runs.find(m => m.b === b && m.q === 8);
+    return `<div class="qrow ${q4.fits ? "" : "off"}"><div class="am"><b>${q4.name} <span class="lvl">${q4.level}</span></b><small>${esc(q4.eg.replace(/ \(MoE\)/, ""))}${b === 120 ? " · MoE" : ""}</small></div>${cellOf(q4)}${cellOf(q8)}</div>`;
   }).join("");
   const verdict = L.on
     ? (L.step ? `<b>${L.step.best ? "Best step on the ladder." : L.step.rating + "."}</b> ${fmt$(L.step.dp)} more than the ${esc(L.step.from.product)} ${esc(L.step.from.chip)} ${shortCfg(L.step.from)} for +${L.step.dc.toFixed(1)} models.` : `<b>On the ladder.</b> The cheapest way to start.`)
-    : `<b>Skip this one.</b> The ${esc(L.beatenBy.product)} ${esc(L.beatenBy.chip)} ${shortCfg(L.beatenBy)} runs as much or more for ${fmt$(best(L.beatenBy).price)}.`;
+    : `<b>Skip this one.</b> The ${esc(L.beatenBy.product)} ${esc(L.beatenBy.chip)} ${shortCfg(L.beatenBy)} ${skipWhy(L.beatenBy, r)} for ${fmt$(best(L.beatenBy).price)}.`;
   return `<div class="aibox">
     <div class="aitop">
-      <div><div class="big2 num">${r.cov.toFixed(1)}<span>of 5</span></div><div class="cap">models it runs well</div>${covBar(r.cov)}</div>
+      <div><div class="big2 num">${r.cov.toFixed(1)}<span>of ${NM}</span></div><div class="cap">models it runs well</div>${covBar(r.cov)}</div>
       <div><div class="big2 num">${r.score}</div><div class="cap">AI score (specs)</div></div>
       <div><div class="big2 num">~${Math.round(r.ai.readSec)}<span>s</span></div><div class="cap">to read a 20-page prompt</div></div>
     </div>
+    ${r.ai.top ? `<div class="smart"><span class="sk">Smartest model it runs</span><b>${esc(r.ai.top.eg.replace(/ \(MoE\)/, ""))} at ${r.ai.top.q}-bit</b> <span class="lvl">${r.ai.top.level}</span><span class="room">Room for about <b>${r.ai.top.pages} pages</b> of text in one conversation (${Math.round(r.ai.top.ctx / 1000)}K tokens)</span></div>` : ""}
     <div class="lverdict ${L.on ? (L.step && L.step.rating === "Poor step" ? "poor" : "good") : "skip"}">${verdict}</div>
     ${rows}
     <div class="aifoot">Writing speed in words (tokens) per second at 4-bit. Smooth is 20+, usable is 8 to 20. Estimates from specs, not benchmarks.</div>
     <div class="sure"><span class="sk">How sure</span>
-      <span class="cf hi">Fits or won’t fit: high</span><span class="cf md">Writing speed: ±20%</span><span class="cf lo">${/^M[1-4]\b/i.test(r.chip) ? "Reading speed: ±25%" : /^M6/i.test(r.chip) ? "M6 speeds: rough guess" : "Reading speed: early reports"}</span>
+      <span class="cf hi">Fits or won’t fit: high</span><span class="cf hi">Room for text: high</span><span class="cf md">Writing speed: ±20%</span><span class="cf lo">${/^M[1-4]\b/i.test(r.chip) ? "Reading speed: ±25%" : /^M6/i.test(r.chip) ? "M6 speeds: rough guess" : "Reading speed: early reports"}</span>
       <a href="#how">How it’s calculated</a></div>
   </div>`;
 }
@@ -1078,18 +1128,19 @@ function aiStepHTML(r) {
 function renderValue() {
   const M = state.model, cur = current(), LD = ladder();
   // Cheapest machine that runs each model size, plus the fastest one under twice that price.
-  document.getElementById("tiers").innerHTML = AI.models.map((m, i) => {
-    const can = M.rows.filter(r => r.ai.runs[i].fits).sort((a, b) => best(a).price - best(b).price);
-    if (!can.length) return `<div class="tier none"><div class="tn">${m.name}</div><div class="te">${esc(m.eg)}</div><div class="tx">Nothing on your list can run it.</div></div>`;
-    const c = can[0], p = best(c).price;
-    const fast = can.filter(r => best(r).price <= p * 2).sort((a, b) => b.ai.runs[i].tps - a.ai.runs[i].tps)[0];
+  const cheapest = m => M.rows.filter(r => r.ai.runs.find(x => x.b === m.b && x.q === m.q).fits).sort((a, b) => best(a).price - best(b).price)[0];
+  document.getElementById("tiers").innerHTML = [...new Set(AI.models.map(m => m.b))].map(b => {
+    const m4 = AI.models.find(m => m.b === b && m.q === 4), m8 = AI.models.find(m => m.b === b && m.q === 8);
+    const c = cheapest(m4);
+    if (!c) return `<div class="tier none"><div class="tn">${m4.name}</div><div class="te">${esc(m4.eg)}</div><div class="tx">Nothing on your list can run it.</div></div>`;
+    const t4 = c.ai.runs.find(x => x.b === b && x.q === 4), c8 = m8 && cheapest(m8);
     return `<button class="tier" data-id="${esc(c.id)}">
-      <div class="tn">${m.name}</div><div class="te">${esc(m.eg)}</div>
+      <div class="tn">${m4.name}</div><div class="te">${esc(m4.eg)}</div>
       <div class="tl">Cheapest way to run it</div>
       <div class="tc">${esc(c.product)} ${esc(c.chip)}<small>${shortCfg(c)}</small></div>
-      <div class="tpx num">${fmt$(p)}</div>
-      <div class="ts">~${Math.round(c.ai.runs[i].tps)} words/s · ${ratingOf(c.ai.runs[i].tps)}</div>
-      ${fast && fast.id !== c.id ? `<div class="tf">Faster: ${esc(fast.chip)} ${shortCfg(fast)}, ~${Math.round(fast.ai.runs[i].tps)} words/s for ${fmt$(best(fast).price)}</div>` : ""}
+      <div class="tpx num">${fmt$(best(c).price)}</div>
+      <div class="ts">4-bit · ~${Math.round(t4.tps)} words/s · ${ratingOf(t4.tps)}</div>
+      <div class="tf">${!m8 ? "Only made at about 4-bit." : c8 ? `8-bit: ${esc(c8.product.replace("Mac ", ""))} ${esc(c8.chip)} ${shortCfg(c8)}, ${fmt$(best(c8).price)}, ~${Math.round(c8.ai.runs.find(x => x.b === b && x.q === 8).tps)} words/s` : "8-bit: nothing on your list has the memory."}</div>
     </button>`;
   }).join("");
   document.querySelectorAll("#tiers [data-id]").forEach(b => b.onclick = () => { setCur(b.dataset.id); document.getElementById("build").scrollIntoView(); });
@@ -1107,16 +1158,16 @@ function renderValue() {
       const s = LD.info[r.id].step, cls = !s ? "start" : s.best ? "best" : s.rating === "Great step" ? "great" : s.rating === "Fair step" ? "fair" : "poor";
       return `<button class="lrow ${cls} ${r.id === cur.id ? "cur" : ""}" data-id="${esc(r.id)}">
         <span class="ln">${name(r)}${you(r)}<small>${fmt$(best(r).price)} · ${r.ai.top ? "up to " + r.ai.top.name : "no models"}</small></span>
-        <span class="lc">${covBar(r.cov)}<small class="num">${r.cov.toFixed(1)} of 5 models</small></span>
+        <span class="lc">${covBar(r.cov)}<small class="num">${r.cov.toFixed(1)} of ${NM} models</small></span>
         <span class="ls">${s ? `<span class="step ${cls}">${s.best ? "Best step" : s.rating}</span><small class="num">+${fmt$(s.dp)} for +${s.dc.toFixed(1)} · ${fmt$(Math.round(s.per))} per model</small>` : `<span class="step start">Start here</span><small>Cheapest machine</small>`}</span></button>`;
     }).join("");
     const skips = M.rows.filter(r => !LD.info[r.id].on).sort((a, b) => best(a).price - best(b).price).map(r => {
       const o = LD.info[r.id].beatenBy, d = best(r).price - best(o).price;
       return `<button class="srow ${r.id === cur.id ? "cur" : ""}" data-id="${esc(r.id)}"><span>${name(r)}${you(r)} <small>${fmt$(best(r).price)}</small></span>
-        <span class="sw">${esc(o.product.replace("Mac ", ""))} ${esc(o.chip)} ${shortCfg(o)} runs ${o.cov > r.cov ? "more" : "the same"} for ${d > 0.5 ? fmt$(d) + " less" : "the same price"}</span></button>`;
+        <span class="sw">${esc(o.product.replace("Mac ", ""))} ${esc(o.chip)} ${shortCfg(o)} ${skipWhy(o, r)} for ${d > 0.5 ? fmt$(d) + " less" : "the same price"}</span></button>`;
     }).join("");
     h = `<div class="vhead"><span>Each step up the ladder runs more models. Climb until your budget or needs stop.</span></div>${rungs}
-      <div class="skiphead">Skip these <span>Something cheaper runs as much or more.</span></div>${skips}`;
+      <div class="skiphead">Skip these <span>A cheaper machine scores the same or higher.</span></div>${skips}`;
   } else {
     const V = VALUE[k];
     const ranked = M.rows.map(r => ({ r, v: costPer(r, k) })).sort((a, b) => a.v - b.v), top = ranked[ranked.length - 1].v;
@@ -1132,10 +1183,11 @@ function renderValue() {
   const base = M.rows.base;
   document.getElementById("how").innerHTML = `<summary>How it’s calculated</summary>
     <div class="howbody">
-      <p><b>Memory decides which models fit.</b> About ${AI.share * 100}% of unified memory can go to the GPU (the macOS default on most configurations; it can be raised). We keep ${AI.ctx}GB free for the conversation, then check each model’s 4-bit file size against what’s left.</p>
-      <p><b>Bandwidth decides writing speed.</b> Every word a model writes reads the whole model from memory once, so words per second ≈ ${AI.eff * 100}% of memory bandwidth ÷ model size. Early reports for M5 Pro (50–60 words/s on an 8B model) and M5 Max (100–120) put this at the low end, so it should hold within about 20%. MLX apps often run faster than llama.cpp apps like Ollama. The 120B model is a mixture-of-experts that only reads about ${AI.models[4].active}GB per word, which is why it’s fast once it fits.</p>
+      <p><b>Memory decides which models fit.</b> About ${AI.share * 100}% of unified memory can go to the GPU (the macOS default on most configurations; it can be raised). We keep ${AI.ctx}GB free for the conversation, then check each model’s file size against what’s left. Every size is tested at 4-bit (smaller, slightly lower quality) and 8-bit (about twice the size, close to full quality), so extra memory gets credit. You can raise the GPU’s share of memory with a Terminal command, which would let some machines fit one more model.</p>
+      <p><b>Bandwidth decides writing speed.</b> Every word a model writes reads the whole model from memory once, so words per second ≈ ${AI.eff * 100}% of memory bandwidth ÷ model size. Early reports for M5 Pro (50–60 words/s on an 8B model) and M5 Max (100–120) put this at the low end, so it should hold within about 20%. MLX apps often run faster than llama.cpp apps like Ollama. The 120B model is a mixture-of-experts that only reads about ${AI.models.find(m => m.b === 120).active}GB per word, which is why it’s fast once it fits.</p>
       <p><b>GPU power decides reading speed.</b> Reading a prompt is compute-bound: about ${AI.perCore} tokens per second per GPU core on an 8B model for M4-generation chips, times 3 for M5 and M6, whose GPU cores add neural accelerators. Apple quotes 3.5 to 4 times M4, and one early report measured about 3.6 times. M6 is assumed to match M5; there are no M6 results yet.</p>
-      <p><b>Model coverage</b> counts how many of the five models a machine runs well. A model that fits earns full credit if it writes at ${AI.goodWrite}+ words per second and reads a 20-page prompt in ${AI.goodRead} seconds or less, and partial credit if it’s slower. A model that doesn’t fit earns nothing.</p>
+      <p><b>Quality and room.</b> Bigger models give noticeably better answers, so each size gets a general level from Basic (8B) to Top (120B). Published test scores for these models use different setups and can’t be compared fairly, so exact scores aren’t shown. 8-bit is close to full quality; 4-bit usually loses a point or two on tests. Memory left over after the model loads holds the conversation itself: about ${AI_META[32].kv}KB per token for a 32B model, so “room” is that leftover divided by the model’s per-token size, at about ${TOK_PER_PAGE} tokens per page, capped at the models’ 128K limit.</p>
+      <p><b>Model coverage</b> counts how many of the ${NM} test models (6 sizes from 8B to 120B, each at 4-bit and 8-bit except gpt-oss-120b, which only comes at about 4-bit) a machine runs well. A model that fits earns full credit if it writes at ${AI.goodWrite}+ words per second and reads a 20-page prompt in ${AI.goodRead} seconds or less, and partial credit if it’s slower. A model that doesn’t fit earns nothing.</p>
       <p><b>The upgrade ladder</b> is the standard cost-effectiveness method: sort by price, drop anything where something cheaper runs as much or more, then price each step up by what it costs per extra model. Great steps cost under $1,000 per model, fair steps under $2,000. No single “best value” exists when machines differ in both price and capability; the ladder shows which upgrades are worth paying for, and you stop where your budget or needs do. Prices use the stores you’ve ticked.</p>
       <p><b>AI score</b> is a spec summary: the geometric mean of usable memory, bandwidth and GPU compute, with the ${esc(base.product)} ${esc(base.chip)} ${shortCfg(base)} set to 100. It isn’t a value measure, so it isn’t divided by price.</p>
       <p><b>How sure is this?</b> Which models fit is reliable memory math. Writing speeds are within about 20%, and real apps differ by 20–30% on the same Mac. Reading speeds for M5 rest on Apple’s claims plus early reports, and M6 is a guess. The ${AI.goodWrite} words/s and ${AI.goodRead}-second cutoffs are judgment calls. Bandwidth figures come from your sheet.</p>
@@ -1259,7 +1311,7 @@ const METRICS = {
   cpu: { label: "CPU cores", noun: "CPU cores",        get: r => r.cpu, fmt: v => v + " cores" },
   ram: { label: "Memory",    noun: "memory",           get: r => r.ram, fmt: fmtSize },
   ssd: { label: "Storage",   noun: "storage",          get: r => r.ssd, fmt: fmtSize },
-  cov: { label: "Models it runs", noun: "model coverage", get: r => r.cov, fmt: v => v.toFixed(1) + " of 5" },
+  cov: { label: "Models it runs", noun: "model coverage", get: r => r.cov, fmt: v => v.toFixed(1) + " of " + AI.models.length },
   score: { label: "AI score", noun: "AI score",        get: r => r.score, fmt: v => v + " pts" },
   topB: { label: "Biggest model", noun: "model size",  get: r => r.topB, fmt: v => v ? v + "B" : "none" }
 };
@@ -1289,7 +1341,7 @@ function renderMap() {
   [500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 8000].filter(v => v > lo && v < hi).forEach(v => {
     g += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${H - m.b}" opacity=".5"/><text x="${X(v)}" y="${H - m.b + 18}" text-anchor="middle">${v >= 1000 ? "$" + v / 1000 + "k" : "$" + v}</text>`;
   });
-  g += `<text x="${m.l}" y="${m.t - 4}" style="font-size:10px">${esc(met.label.toUpperCase())}${state.metric === "bw" ? " (GB/s)" : state.metric === "topB" ? " (BILLION PARAMETERS, 4-BIT)" : state.metric === "cov" ? " (OF 5 REFERENCE MODELS)" : state.metric === "ram" || state.metric === "ssd" ? " (GB)" : ""}</text>`;
+  g += `<text x="${m.l}" y="${m.t - 4}" style="font-size:10px">${esc(met.label.toUpperCase())}${state.metric === "bw" ? " (GB/s)" : state.metric === "topB" ? " (BILLION PARAMETERS, 4-BIT)" : state.metric === "cov" ? ` (OF ${AI.models.length} TEST MODELS)` : state.metric === "ram" || state.metric === "ssd" ? " (GB)" : ""}</text>`;
   const fr = frontierIds(state.metric);
   const fpts = M.rows.filter(r => fr.has(r.id)).sort((a, b) => best(a).price - best(b).price);
   let path = "";
@@ -1395,6 +1447,16 @@ function renderCompare() {
     const lbl = s.k === "ram" || s.k === "ssd" ? (diff > 0 ? "+" : "−") + fmtSize(Math.abs(diff)) : (diff > 0 ? "+" : "−") + (s.k === "cov" ? Math.abs(diff).toFixed(1) : Math.abs(diff)) + (s.unit === "B" ? "B" : s.unit ? " " + s.unit : "");
     return `<div class="drow ${a === b ? "same" : ""}"><span class="k">${s.label}</span><span class="a num">${s.fmt(a)}</span>${bar(a, b).replace("LBL", lbl)}<span class="b num">${s.fmt(b)}</span></div>`;
   }).join("");
+  const shared = A.ai.runs.filter((m, i) => m.fits && B.ai.runs[i].fits).sort((x, y) => x.b - y.b || x.q - y.q).pop();
+  if (shared) {
+    const i = A.ai.runs.indexOf(shared), pa2 = A.ai.runs[i].pages, pb2 = B.ai.runs[i].pages;
+    rows += `<div class="drow ${pa2 === pb2 ? "same" : ""}"><span class="k">Room for text<small>${shared.name} ${shared.q}-bit, pages</small></span><span class="a num">${pa2}</span>${bar(pa2, pb2).replace("LBL", (pb2 > pa2 ? "+" : "−") + Math.abs(pb2 - pa2) + " pages")}<span class="b num">${pb2}</span></div>`;
+  }
+  const sa = A.ai.top, sb = B.ai.top;
+  if (sa && sb) {
+    const lv = m => `${m.name} ${m.q}-bit`;
+    document.getElementById("verdict").insertAdjacentHTML("beforeend", ` <span class="vq">${sa.b === sb.b && sa.q === sb.q ? `Both run the same smartest model (${esc(sa.eg)} at ${sa.q}-bit), so answer quality is the same; ${B.ai.top.pages > A.ai.top.pages ? "the second" : "your build"} holds ${Math.abs(B.ai.top.pages - A.ai.top.pages)} more pages of text in a conversation.` : `Smartest model: ${lv(sa)} (${sa.level}) on yours vs ${lv(sb)} (${sb.level}) on the other.`}</span>`);
+  }
   const ma = msrpOf(A), mb = msrpOf(B);
   rows += `<div class="drow ${pa === pb ? "same" : ""}"><span class="k">Best price<small>what you'd pay</small></span><span class="a num">${fmt$(pa)}</span>${bar(pa, pb, true).replace("LBL", fmtDelta(d))}<span class="b num">${fmt$(pb)}</span></div>`;
   rows += `<div class="drow ${ma === mb ? "same" : ""}"><span class="k">Apple price<small>full price</small></span><span class="a num">${fmt$(ma)}</span>${bar(ma, mb, true).replace("LBL", fmtDelta(mb - ma))}<span class="b num">${fmt$(mb)}</span></div>`;
@@ -1424,7 +1486,7 @@ function renderTable() {
     const b = best(r), of = offers(r);
     h += `<tr data-id="${esc(r.id)}" class="${r.id === state.cur ? "cur" : ""}">
       <td><span class="cfg ${MINE.has(r.id + "|*") ? "mine" : ""}">${state.sort === "lineup" ? shortCfg(r) : `${esc(r.product)} ${esc(r.chip)} ${r.cpu}/${r.gpu}`}<small>${state.sort === "lineup" ? (r.status || r.notes ? esc([r.status, r.notes].filter(Boolean).join(" · ")) : "&nbsp;") : shortCfg(r)}</small></span></td>
-      <td><span class="bp">${fmt$(b.price)}</span></td><td class="sv">${b.save > 0 ? fmt$(b.save) : "—"}</td><td>${r.cov.toFixed(1)} of 5</td><td class="${LDI[r.id].on ? "lad" : "skp"}">${LDI[r.id].on ? "On the ladder" : "Skip"}</td>
+      <td><span class="bp">${fmt$(b.price)}</span></td><td class="sv">${b.save > 0 ? fmt$(b.save) : "—"}</td><td>${r.cov.toFixed(1)} of ${AI.models.length}</td><td class="${LDI[r.id].on ? "lad" : "skp"}">${LDI[r.id].on ? "On the ladder" : "Skip"}</td>
       ${cols.map(s => {
         const o = of.find(o => o.store.key === s.key);
         if (!o) return `<td class="na">—</td>`;
