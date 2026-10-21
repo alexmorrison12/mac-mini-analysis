@@ -402,6 +402,35 @@ td.lad{color:var(--green)} td.skp{color:var(--orange)}
 .smart .sk{flex-basis:100%;font-size:12px;font-weight:600;color:var(--muted)}
 .smart .room{flex-basis:100%;font-size:13px;color:var(--ink-2)}
 .vq{display:block;font-size:.7em;font-weight:500;color:var(--muted);margin-top:10px;line-height:1.4}
+
+/* ---------- credits & budget ---------- */
+#budget{border-top:1px solid var(--hair-2)}
+.bgrid{display:grid;gap:16px}
+@media (min-width:900px){.bgrid{grid-template-columns:1fr 1.25fr;align-items:start}}
+.bcard{background:var(--bg-alt);border-radius:18px;padding:20px;display:grid;gap:10px;min-width:0}
+.bcard h3{font-size:19px;font-weight:600;margin:0 0 4px}
+.bcard h3 span{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:3px}
+.bcard input[type=text],.bcard input[type=number],.bcard select{width:100%;font:inherit;font-size:16px;padding:9px 11px;border-radius:10px;border:1px solid var(--hair);background:var(--tile);color:var(--ink);min-width:0}
+.bcard input:focus,.bcard select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.bcard input[type=checkbox]{width:20px;height:20px;accent-color:var(--blue)}
+.crow{display:grid;grid-template-columns:auto minmax(0,1fr) 110px auto;gap:8px;align-items:center;padding-bottom:6px;border-bottom:1px solid var(--hair)}
+.crow select{grid-column:2/4;grid-row:2}
+.crow .iconbtn{grid-column:4;grid-row:1}
+.brow{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1fr);gap:8px;align-items:center}
+.irow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.8fr) minmax(0,1.3fr) auto;gap:8px;align-items:center}
+.irow .ic{font-size:13px;color:var(--muted)} .irow .ic b{color:var(--ink)}
+@media (max-width:560px){.irow{grid-template-columns:1fr auto}.irow .money{grid-column:1}.irow .ic{grid-column:1/-1}}
+.bcard .btn{justify-self:start}
+.split{background:var(--tile);border-radius:12px;padding:14px;display:grid;gap:8px}
+.split label{font-size:14px;color:var(--ink-2);display:flex;justify-content:space-between;gap:10px}
+.split label b{font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.split input[type=range]{width:100%;accent-color:var(--blue)}
+.splitnote{font-size:13px;color:var(--muted)} .splitnote b{color:var(--ink)}
+.linkbtn{border:0;background:none;color:var(--link);padding:0;font-size:13px}
+.ihead{font-size:12px;font-weight:600;color:var(--muted);margin-top:6px}
+.btotal{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;font-size:14px;color:var(--muted);border-top:1px solid var(--hair);padding-top:12px}
+.btotal b{font-size:21px;color:var(--ink);margin-left:6px}
+.oop{display:block;margin-top:8px;font-size:14px;color:var(--ink-2)} .oop b{color:var(--ink)}
 </style>
 
 </head>
@@ -416,6 +445,7 @@ td.lad{color:var(--green)} td.skp{color:var(--orange)}
       <a href="#value">Value</a>
       <a href="#compare">Compare</a>
       <a href="#prices">Prices</a>
+      <a href="#budget">Budget</a>
       <a href="#add">Add</a>
     </nav>
     <button class="iconbtn" id="themeBtn" aria-label="Switch to dark appearance"></button>
@@ -500,6 +530,18 @@ td.lad{color:var(--green)} td.skp{color:var(--orange)}
       </div>
       <div class="tscroll"><table id="tbl"></table></div>
       <p class="tfoot" id="tfoot"></p>
+    </div>
+  </section>
+
+  <section id="budget">
+    <div class="wrap">
+      <div class="shead">
+        <div>
+          <h2>Credits and budget. <span>What you’ll actually pay.</span></h2>
+          <p>Store credits come off that store’s price everywhere on this page, so they can change where the best deal is. A shared budget, like money from work, can go anywhere: split it between the Mac and anything else you’re buying. Saved in this browser only.</p>
+        </div>
+      </div>
+      <div class="bgrid" id="budgetBody"></div>
     </div>
   </section>
 
@@ -671,11 +713,14 @@ const state = {
   model: null, source: "snapshot",
   off: new Set(saved.off || []),          // store keys the viewer can't buy from
   trade: !!saved.trade,
+  // Store credits apply at one store, like a reward certificate. The shared budget works anywhere and is split across purchases.
+  credits: saved.credits || [{ id: "c1", name: "Costco Executive reward", amount: 300, store: "costco", on: true }],
+  budget: saved.budget || { name: "Work budget", amount: 2000, on: true, toMac: null, items: [{ id: "i1", name: "iPhone", price: null }] },
   cur: saved.cur || null, rival: saved.rival || null,
   metric: saved.metric || "bw", vmetric: saved.vmetric || "ladder", sort: saved.sort || "lineup", pick: null
 };
 function persist() {
-  try { localStorage.setItem(LS, JSON.stringify({ off: [...state.off], trade: state.trade, cur: state.cur, rival: state.rival, metric: state.metric, vmetric: state.vmetric, sort: state.sort })); } catch {}
+  try { localStorage.setItem(LS, JSON.stringify({ off: [...state.off], trade: state.trade, cur: state.cur, rival: state.rival, metric: state.metric, vmetric: state.vmetric, sort: state.sort, credits: state.credits, budget: state.budget })); } catch {}
 }
 
 // ===== Pricing =====
@@ -685,10 +730,23 @@ function offers(r) {
   M.stores.forEach(s => {
     const raw = r.prices[s.key];
     if (raw == null) return;
-    const credit = state.trade && s.apple && M.tradeAmt ? M.tradeAmt : 0;
+    const trade = state.trade && s.apple && M.tradeAmt ? M.tradeAmt : 0;
+    const store = state.credits.filter(c => c.on && c.amount > 0 && c.store === s.key).reduce((t, c) => t + c.amount, 0);
+    const credit = Math.min(raw, trade + store);
     out.push({ store: s, raw, price: Math.max(0, raw - credit), credit, off: !s.msrp && state.off.has(s.key) });
   });
   return out.sort((a, b) => a.price - b.price || (a.store.msrp ? 1 : -1));
+}
+// How much of the shared budget goes to the Mac, and what's left for everything else.
+function budgetSplit(r) {
+  const B = state.budget, price = best(r).price;
+  if (!B.on || !(B.amount > 0)) return { toMac: 0, pay: price, left: 0, items: [] };
+  const others = B.items.reduce((t, i) => t + (i.price > 0 ? i.price : 0), 0);
+  const auto = Math.max(0, Math.min(price, B.amount - others));
+  const toMac = Math.max(0, Math.min(price, B.amount, B.toMac ?? auto));
+  let left = B.amount - toMac;
+  const items = B.items.map(i => { const p = i.price > 0 ? i.price : 0, use = Math.min(p, left); left -= use; return { ...i, covered: use, pay: p - use }; });
+  return { toMac, pay: price - toMac, left, items, auto };
 }
 function msrpOf(r) { const s = state.model.stores.find(s => s.msrp); return r.prices[s.key] ?? null; }
 function best(r) {
@@ -929,11 +987,13 @@ function renderPrefs() {
     const ok = has(s), on = ok && !state.off.has(s.key);
     h += `<button class="chip" data-store="${esc(s.key)}" aria-pressed="${on}" ${ok ? "" : "disabled"}><span class="tick"></span>${esc(s.name)}${ok ? "" : " <small>No prices yet</small>"}</button>`;
   });
+  state.credits.forEach((c, i) => { if (c.amount > 0) h += `<button class="chip trade" data-credit="${i}" aria-pressed="${c.on}"><span class="tick"></span>${esc(c.name)} ${fmt$(c.amount)} <small>at ${esc((M.stores.find(s => s.key === c.store) || { short: c.store }).short)}</small></button>`; });
   if (M.tradeAmt) h += `<button class="chip trade" id="tradeBtn" aria-pressed="${state.trade}"><span class="tick"></span>Trade-in ${fmt$(M.tradeAmt)} <small>at Apple</small></button>`;
   el.innerHTML = h;
   el.querySelectorAll("[data-store]").forEach(b => b.onclick = () => {
     const k = b.dataset.store; state.off.has(k) ? state.off.delete(k) : state.off.add(k); persist(); renderAll();
   });
+  el.querySelectorAll("[data-credit]").forEach(b => b.onclick = () => { const c = state.credits[+b.dataset.credit]; c.on = !c.on; persist(); renderAll(); });
   const t = document.getElementById("tradeBtn"); if (t) t.onclick = () => { state.trade = !state.trade; persist(); renderAll(); };
   document.getElementById("syncSlot").innerHTML = syncHTML();
   const s = document.getElementById("syncBtn"); if (s) s.onclick = manualSync;
@@ -973,13 +1033,13 @@ function whereToBuy(r) {
   const rungs = live.map(o => {
     const isBest = Math.abs(o.price - lo) < 0.005, x = pos(o.price);
     return `<div class="rung ${isBest ? "best" : ""}">
-      <div class="st">${esc(o.store.short)}<small>${o.store.msrp ? "Full price" : o.credit ? "After trade-in" : isBest ? "Lowest" : "&nbsp;"}</small></div>
+      <div class="st">${esc(o.store.short)}<small>${o.store.msrp ? "Full price" : o.credit ? "After credits" : isBest ? "Lowest" : "&nbsp;"}</small></div>
       <div class="tr"><b style="width:${x}%"></b><i style="left:${x}%"></i></div>
       <div class="pr">${o.credit ? `<s>${fmt$(o.raw)}</s>` : ""}${fmt$(o.price)}<small>${isBest ? "Best price" : "+ " + fmt$(o.price - lo)}</small></div></div>`;
   }).join("");
   const notes = [missing.length ? `No price listed at ${list(missing)}.` : "", hidden.length ? `Not counting ${list(hidden)}.` : ""].filter(Boolean).join(" ");
   return `<div class="wtb" id="pricebox">
-    <div class="headline"><b class="num">${fmt$(b.price)}</b>at ${where}. ${b.save > 0 ? `<span class="sv">You save ${fmt$(b.save)}</span> off Apple’s ${fmt$(msrp)}.` : "That’s Apple’s full price."}</div>
+    <div class="headline"><b class="num">${fmt$(b.price)}</b>at ${where}. ${b.save > 0 ? `<span class="sv">You save ${fmt$(b.save)}</span> off Apple’s ${fmt$(msrp)}.` : "That’s Apple’s full price."}${(() => { const sp = budgetSplit(r); return sp.toMac > 0 ? `<span class="oop">${esc(state.budget.name)} covers ${fmt$(sp.toMac)}, so you pay <b>${fmt$(sp.pay)}</b> yourself. <a href="#budget">Change</a></span>` : ""; })()}</div>
     ${rungs}${notes ? `<div class="missing">${notes}</div>` : ""}</div>`;
 }
 function renderSteps() {
@@ -1050,7 +1110,10 @@ function renderSteps() {
 function renderBar() {
   const r = current(), b = best(r);
   document.getElementById("mbarC").textContent = `${r.product} · ${r.chip} · ${shortCfg(r)}`;
-  document.getElementById("mbarP").innerHTML = `${fmt$(b.price)}<small>at ${b.stores.length ? esc(b.stores[0].short) : "Apple"}</small>`;
+  const sp = budgetSplit(r);
+  document.getElementById("mbarP").innerHTML = sp.toMac > 0
+    ? `${fmt$(sp.pay)}<small>you pay · ${fmt$(b.price)} at ${b.stores.length ? esc(b.stores[0].short) : "Apple"}</small>`
+    : `${fmt$(b.price)}<small>at ${b.stores.length ? esc(b.stores[0].short) : "Apple"}</small>`;
   const s = document.getElementById("mbarS");
   s.textContent = b.save > 0 ? `Save ${fmt$(b.save)}` : "Apple’s full price"; s.className = "save" + (b.save > 0 ? "" : " zero");
 }
@@ -1302,6 +1365,65 @@ function renderEntries() {
     try { await navigator.clipboard.writeText(text); msg.textContent = "Copied. Paste it next to your sheet, then move each price into its store’s column."; }
     catch { msg.innerHTML = `Copy this text:<textarea class="copybox" readonly rows="${Math.min(6, ENTRIES.length + 1)}">${esc(text)}</textarea>`; msg.querySelector("textarea").select(); }
   };
+}
+
+// ===== Credits & budget section =====
+function renderBudget() {
+  const M = state.model, r = current(), B = state.budget, sp = budgetSplit(r), price = best(r).price;
+  const storeSel = (v, i) => `<select data-cs="${i}" aria-label="Store">${M.stores.map(s => `<option value="${esc(s.key)}" ${s.key === v ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>`;
+  const credits = state.credits.map((c, i) => `<div class="crow">
+      <input type="checkbox" data-con="${i}" ${c.on ? "checked" : ""} aria-label="Use this credit">
+      <input type="text" data-cn="${i}" value="${esc(c.name)}" aria-label="Credit name">
+      <span class="money"><i>$</i><input type="number" inputmode="decimal" min="0" step="1" data-ca="${i}" value="${c.amount || ""}" aria-label="Amount"></span>
+      ${storeSel(c.store, i)}
+      <button class="iconbtn" data-cdel="${i}" aria-label="Remove this credit"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div>`).join("");
+  const items = sp.items.length ? sp.items : B.items.map(i => ({ ...i, covered: 0, pay: i.price || 0 }));
+  const itemRows = items.map((it, i) => `<div class="irow">
+      <input type="text" data-in="${i}" value="${esc(it.name)}" placeholder="Item" aria-label="Item name">
+      <span class="money"><i>$</i><input type="number" inputmode="decimal" min="0" step="1" data-ip="${i}" value="${it.price || ""}" placeholder="Price" aria-label="Item price"></span>
+      <span class="ic num">${it.price > 0 ? (B.on ? `${fmt$(it.covered)} covered · you pay <b>${fmt$(it.pay)}</b>` : `you pay <b>${fmt$(it.price)}</b>`) : "<small>Add its price</small>"}</span>
+      <button class="iconbtn" data-idel="${i}" aria-label="Remove this item"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button></div>`).join("");
+  const max = Math.round(Math.min(B.amount || 0, price));
+  const totalPay = sp.pay + items.reduce((t, i) => t + (B.on ? i.pay : (i.price || 0)), 0);
+  document.getElementById("budgetBody").innerHTML = `
+    <div class="bcard">
+      <h3>Store credits <span>Used only at their store, and counted in every best price.</span></h3>
+      ${credits || `<p class="empty">No store credits.</p>`}
+      <button class="btn" id="addCredit">Add a credit</button>
+    </div>
+    <div class="bcard">
+      <h3>Shared budget <span>Usable anywhere. Split it between the Mac and other things.</span></h3>
+      <div class="brow"><input type="checkbox" id="bOn" ${B.on ? "checked" : ""} aria-label="Use this budget">
+        <input type="text" id="bName" value="${esc(B.name)}" aria-label="Budget name">
+        <span class="money"><i>$</i><input type="number" inputmode="decimal" min="0" step="1" id="bAmt" value="${B.amount || ""}" aria-label="Budget amount"></span></div>
+      <div class="split" ${B.on && B.amount > 0 ? "" : "hidden"}>
+        <label for="bMac">Toward the ${esc(r.product)} ${esc(r.chip)} <b id="bMacVal">${fmt$(sp.toMac)}</b></label>
+        <input type="range" id="bMac" min="0" max="${max}" step="25" value="${sp.toMac}">
+        <div class="splitnote">You pay <b id="bMacPay">${fmt$(sp.pay)}</b> of its ${fmt$(price)} best price. ${B.toMac == null ? "Set automatically to leave enough for the items below." : `<button class="linkbtn" id="bAuto">Reset to automatic</button>`}</div>
+      </div>
+      <div class="ihead">Also buying with it</div>
+      ${itemRows}
+      <button class="btn" id="addItem">Add an item</button>
+      <div class="btotal">${B.on && B.amount > 0 ? `<span>${sp.left > 0 ? `${fmt$(sp.left)} of the budget is unused.` : sp.left < 0 ? "" : "The whole budget is used."}</span>` : "<span></span>"}<span>Total out of pocket <b class="num">${fmt$(totalPay)}</b></span></div>
+    </div>`;
+  const q = s => document.querySelectorAll("#budgetBody " + s), save = () => { persist(); renderAll(); };
+  q("[data-con]").forEach(e => e.onchange = () => { state.credits[+e.dataset.con].on = e.checked; save(); });
+  q("[data-cn]").forEach(e => e.onchange = () => { state.credits[+e.dataset.cn].name = e.value.trim() || "Credit"; save(); });
+  q("[data-ca]").forEach(e => e.onchange = () => { state.credits[+e.dataset.ca].amount = Math.max(0, parseFloat(e.value) || 0); save(); });
+  q("[data-cs]").forEach(e => e.onchange = () => { state.credits[+e.dataset.cs].store = e.value; save(); });
+  q("[data-cdel]").forEach(e => e.onclick = () => { state.credits.splice(+e.dataset.cdel, 1); save(); });
+  document.getElementById("addCredit").onclick = () => { state.credits.push({ id: "c" + Date.now(), name: "Store credit", amount: 0, store: M.stores[0].key, on: true }); save(); };
+  document.getElementById("bOn").onchange = e => { B.on = e.target.checked; save(); };
+  document.getElementById("bName").onchange = e => { B.name = e.target.value.trim() || "Budget"; save(); };
+  document.getElementById("bAmt").onchange = e => { B.amount = Math.max(0, parseFloat(e.target.value) || 0); save(); };
+  const sl = document.getElementById("bMac");
+  sl.oninput = () => { const v = +sl.value; document.getElementById("bMacVal").textContent = fmt$(v); document.getElementById("bMacPay").textContent = fmt$(price - v); };
+  sl.onchange = () => { B.toMac = +sl.value; save(); };
+  const au = document.getElementById("bAuto"); if (au) au.onclick = () => { B.toMac = null; save(); };
+  q("[data-in]").forEach(e => e.onchange = () => { B.items[+e.dataset.in].name = e.value.trim() || "Item"; save(); });
+  q("[data-ip]").forEach(e => e.onchange = () => { B.items[+e.dataset.ip].price = Math.max(0, parseFloat(e.value) || 0) || null; save(); });
+  q("[data-idel]").forEach(e => e.onclick = () => { B.items.splice(+e.dataset.idel, 1); save(); });
+  document.getElementById("addItem").onclick = () => { B.items.push({ id: "i" + Date.now(), name: "", price: null }); save(); };
 }
 
 // ===== Map =====
@@ -1572,7 +1694,7 @@ function applyModel(model, source) {
   renderAll();
 }
 function renderAll() {
-  renderPrefs(); renderStage(); renderSteps(); renderBar(); renderMetricSeg(); renderMap(); renderValue(); renderCompare(); renderSortSeg(); renderTable(); renderEntries();
+  renderPrefs(); renderStage(); renderSteps(); renderBar(); renderMetricSeg(); renderMap(); renderValue(); renderCompare(); renderSortSeg(); renderTable(); renderEntries(); renderBudget();
   document.getElementById("foot").innerHTML = `Prices from your Google Sheet <a href="${SHEET_URL}" target="_blank" rel="noopener" style="color:inherit">MacMiniAnalysis</a>, WORKING SHEET tab. ${state.source === "live" ? "Synced live." : `Snapshot taken ${SNAPSHOT_DATE}.`}`;
 }
 function initNav() {
@@ -1581,7 +1703,7 @@ function initNav() {
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
   }), { rootMargin: "-45% 0px -50% 0px" });
-  ["build", "map", "value", "compare", "prices", "add"].forEach(id => io.observe(document.getElementById(id)));
+  ["build", "map", "value", "compare", "prices", "budget", "add"].forEach(id => io.observe(document.getElementById(id)));
 }
 applyModel(compose(SNAPSHOT), "snapshot");
 initNav();
