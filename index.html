@@ -4,27 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Configure a Mac mini or Mac Studio, see the best price across stores, and compare any two builds.">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
-/* ---------- photos ---------- */
-.ph{display:block;overflow:hidden;position:relative}
-.ph img{display:block;width:100%;height:100%;object-fit:cover}
-.ph .phf{display:none}
-.ph.nophoto img{display:none}
-.ph.nophoto .phf{display:block}
-.ph.hero{aspect-ratio:3/2;border-radius:14px;background:var(--tile)}
-.ph.hero.nophoto{aspect-ratio:auto;background:none}
-.gallery:has(.ph.hero:not(.nophoto)){padding:10px 10px 14px}
-.both{margin:12px 0 0;display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}
-.both .ph{aspect-ratio:4/3;border-radius:10px}
-.both figcaption{font-size:12px;color:var(--muted);line-height:1.4}
-.both:has(.nophoto){display:none}
-.opt.prod .ph.pico{grid-row:span 3;width:76px;height:56px;border-radius:10px;background:var(--tile)}
-.opt.prod .ph.pico.nophoto{background:none}
-.side .sicon .ph{width:100%;max-width:220px;aspect-ratio:3/2;border-radius:12px}
-.side .sicon .ph.nophoto{aspect-ratio:auto}
-.credits{display:block;margin-top:6px}
-.credits a{color:inherit;text-decoration:underline}
-</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Mac Mini Analysis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -994,22 +974,6 @@ function stageSVG(product) {
     ${box(other, at(other).x, at(other).y, true)}${box(product, at(product).x, at(product).y, false)}</svg>`;
 }
 // Both icons share one scale, so the size difference is real.
-// Real photos from Wikimedia Commons (free licenses, credited in the footer). Drawings stand in if a photo can't load.
-const PHOTOS = {
-  "Mac mini": { src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Mac_mini_2024_%28cropped%29.jpg/1280px-Mac_mini_2024_%28cropped%29.jpg", thumb: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Mac_mini_2024_%28cropped%29.jpg/500px-Mac_mini_2024_%28cropped%29.jpg", alt: "Mac mini, front view" },
-  "Mac Studio": { src: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Mac_Studio_%282022%29_front.jpg/1280px-Mac_Studio_%282022%29_front.jpg", thumb: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Mac_Studio_%282022%29_front.jpg/500px-Mac_Studio_%282022%29_front.jpg", alt: "Mac Studio, front view" },
-  both: { src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Mac_mini_and_Mac_Studio_-_1.jpg/1280px-Mac_mini_and_Mac_Studio_-_1.jpg", alt: "Mac mini next to a Mac Studio on a store table" }
-};
-function photo(key, size, cls, fallback) {
-  const p = PHOTOS[key];
-  return `<span class="ph ${cls}"><img src="${size === "thumb" && p.thumb ? p.thumb : p.src}" alt="${esc(p.alt)}" decoding="async" data-ph><span class="phf">${fallback}</span></span>`;
-}
-function wirePhotos(root) {
-  root.querySelectorAll("img[data-ph]").forEach(img => {
-    const fail = () => img.parentElement.classList.add("nophoto");
-    if (img.complete && !img.naturalWidth) fail(); else img.addEventListener("error", fail, { once: true });
-  });
-}
 function iconSVG(product) {
   return `<svg viewBox="-7.2 -4.2 14.4 12.8" aria-hidden="true">${box(product, 0, product === "Mac Studio" ? 0 : 2.7, false)}</svg>`;
 }
@@ -1040,9 +1004,8 @@ function renderStage() {
   const r = current(), el = document.getElementById("stage");
   const sheet = [r.status && `Status: ${esc(r.status)}`, r.notes && esc(r.notes)].filter(Boolean).join(" · ");
   el.innerHTML = `
-    <div class="gallery">${photo(r.product, "src", "hero", stageSVG(r.product))}
-      <div class="scale"><span class="${r.product === "Mac mini" ? "on" : ""}">Mac mini · 5″ × 5″ × 2″</span><span>Front view</span><span class="${r.product === "Mac Studio" ? "on" : ""}">Mac Studio · 7.7″ × 7.7″ × 3.7″</span></div>
-      <figure class="both">${photo("both", "src", "duo", "")}<figcaption>Real size, side by side: the Mac mini (left) fits on a hand; the Mac Studio (right) is about twice as tall and half again as wide.</figcaption></figure>
+    <div class="gallery">${stageSVG(r.product)}
+      <div class="scale"><span class="${r.product === "Mac mini" ? "on" : ""}">Mac mini · 5″ × 5″ × 2″</span><span>Drawn to scale</span><span class="${r.product === "Mac Studio" ? "on" : ""}">Mac Studio · 7.7″ × 7.7″ × 3.7″</span></div>
     </div>
     <h2 class="model">${esc(r.product)} <span>${esc(r.chip)}</span></h2>
     <p class="specline">${r.cpu}-core CPU, ${r.gpu}-core GPU · ${fmtSize(r.ram)} unified memory · ${fmtSize(r.ssd)} SSD · ${r.bw}GB/s memory bandwidth</p>
@@ -1087,7 +1050,7 @@ function renderSteps() {
   const prodOpts = M.products.map(p => {
     const rows = prodRows(p), from = Math.min(...rows.map(x => best(x).price));
     const chips = [...new Set(rows.map(x => x.chip))];
-    return `<button class="opt prod" aria-pressed="${p === r.product}" data-prod="${esc(p)}">${photo(p, "thumb", "pico", iconSVG(p))}
+    return `<button class="opt prod" aria-pressed="${p === r.product}" data-prod="${esc(p)}">${iconSVG(p)}
       <span class="ot">${esc(p)}</span><span class="op">From ${fmt$(from)}</span>
       <span class="od">${esc(chips[0])}${chips.length > 1 ? " to " + esc(chips[chips.length - 1]) : ""}</span></button>`;
   }).join("");
@@ -1565,7 +1528,7 @@ function phrase(k, a, b) {
 const list = a => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
 function sideHTML(r, tag, cls) {
   const b = best(r), ms = msrpOf(r);
-  return `<div class="side ${cls}"><div class="sicon">${photo(r.product, "thumb", "sph", iconSVG(r.product))}</div><span class="tag">${tag}</span>
+  return `<div class="side ${cls}"><div class="sicon">${iconSVG(r.product)}</div><span class="tag">${tag}</span>
     <span class="nm">${esc(r.product)} ${esc(r.chip)}</span>
     <span class="cf">${chipCores(r)}<br>${shortCfg(r)} · ${r.bw}GB/s</span>
     <span class="pp num">${fmt$(b.price)}</span>
@@ -1732,8 +1695,7 @@ function applyModel(model, source) {
 }
 function renderAll() {
   renderPrefs(); renderStage(); renderSteps(); renderBar(); renderMetricSeg(); renderMap(); renderValue(); renderCompare(); renderSortSeg(); renderTable(); renderEntries(); renderBudget();
-  document.getElementById("foot").innerHTML = `Prices from your Google Sheet <a href="${SHEET_URL}" target="_blank" rel="noopener" style="color:inherit">MacMiniAnalysis</a>, WORKING SHEET tab. ${state.source === "live" ? "Synced live." : `Snapshot taken ${SNAPSHOT_DATE}.`} <span class="credits">Photos via Wikimedia Commons: <a href="https://commons.wikimedia.org/wiki/File:Mac_mini_2024_(cropped).jpg" target="_blank" rel="noopener">Mac mini</a> by Seasider53 (CC BY 4.0), <a href="https://commons.wikimedia.org/wiki/File:Mac_Studio_(2022)_front.jpg" target="_blank" rel="noopener">Mac Studio</a> by Yasu (CC BY-SA 3.0), <a href="https://commons.wikimedia.org/wiki/File:Mac_mini_and_Mac_Studio_-_1.jpg" target="_blank" rel="noopener">side by side</a> by Kyu3a (CC BY-SA 4.0). Photos show the current designs; your exact configuration may differ inside.</span>`;
-  wirePhotos(document);
+  document.getElementById("foot").innerHTML = `Prices from your Google Sheet <a href="${SHEET_URL}" target="_blank" rel="noopener" style="color:inherit">MacMiniAnalysis</a>, WORKING SHEET tab. ${state.source === "live" ? "Synced live." : `Snapshot taken ${SNAPSHOT_DATE}.`}`;
 }
 function initNav() {
   const links = [...document.querySelectorAll("#nav a")];
